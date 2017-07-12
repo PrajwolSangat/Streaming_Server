@@ -13,7 +13,36 @@ public class StreamingAlgorithms {
     HashMap hashTableU = new HashMap();
     HashMap indirectPartitionMapper = new HashMap();
 
+    HashMap hashTableRS = new HashMap();
+    HashMap hashTableRST = new HashMap();
+
     Integer integerTimeStamp = 0;
+
+    public void xJoin(String key, String value, String joinType, String whichStream) {
+        if (joinType.equals("CA")) {
+            switch (whichStream) {
+                // Common Attribute Join [Key is the common attribute]
+                case "R":
+                    integerTimeStamp += 1;
+                    ArrayList<Triplet> arrayList = new ArrayList<>();
+                    if (hashTableR.containsKey(key)) {
+                        hashTableR.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableR.put(key, arrayList);
+                    }
+                    //TODO
+                    break;
+                case "S":
+                    break;
+                case "T":
+                    break;
+                case "U":
+                    break;
+            }
+        }
+    }
 
     public void earlyHashJoin(String key, String value, String joinType, String whichStream) {
 
@@ -57,7 +86,7 @@ public class StreamingAlgorithms {
                             hashTableR.put(key, new ArrayList<String>().add(value));
                         }
                     } else {
-                        hashTableR.put(key, new ArrayList<String>().add(value));
+                        hashTableR.put(key, new ArrayList<String>().add(value));        //WHY INSERT IN R
                     }
                     break;
 
