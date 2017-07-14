@@ -38,11 +38,9 @@ public class StreamingServer {
                 Algorithm algorithm = Algorithm.valueOf(messageRead.split(":")[3]);
                 switch (streamName) {
                     case "R":
-                        System.out.println("=========================" + streamName);
                         executeJoins(algorithm, key, value, streamName);
                         break;
                     case "S":
-                        System.out.println(streamName);
                         executeJoins(algorithm, key, value, streamName);
                         break;
                     case "T":
@@ -66,7 +64,7 @@ public class StreamingServer {
                 streamingAlgorithms.earlyHashJoin(key, value, "1M", streamName);
                 break;
             case SLICEJOIN:
-                streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
+                streamingAlgorithms.sliceJoin(key, value, "DA", streamName);
                 break;
             case XJOIN:
                 break;
