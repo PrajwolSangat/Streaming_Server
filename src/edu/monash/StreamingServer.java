@@ -32,10 +32,10 @@ public class StreamingServer {
             String messageRead;
             while ((messageRead = inFromClient.readLine()) != null) {
                 String streamName = messageRead.split(":")[0];
-
                 String key = messageRead.split(":")[1];
                 String value = messageRead.split(":")[2];
                 Algorithm algorithm = Algorithm.valueOf(messageRead.split(":")[3]);
+
                 switch (streamName) {
                     case "R":
                         executeJoins(algorithm, key, value, streamName);
@@ -61,7 +61,11 @@ public class StreamingServer {
             case AMJOIN:
                 break;
             case EHJOIN:
-                streamingAlgorithms.earlyHashJoin(key, value, "1M", streamName);
+                if (key.equals("CLEANUP")) {
+                    streamingAlgorithms.earlyHashJoinCleanUp(streamingAlgorithms.hashTableCollectionR);
+                } else {
+                    streamingAlgorithms.earlyHashJoin(key, value, "MM", streamName);
+                }
                 break;
             case SLICEJOIN:
                 streamingAlgorithms.sliceJoin(key, value, "DA", streamName);

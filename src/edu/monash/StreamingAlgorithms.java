@@ -1,7 +1,7 @@
 package edu.monash;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 
 /**
  * Created by psangats on 7/07/2017.
@@ -12,6 +12,10 @@ public class StreamingAlgorithms {
     HashMap hashTableT = new HashMap();
     HashMap hashTableU = new HashMap();
     HashMap indirectPartitionMapper = new HashMap();
+
+    // Used for Biased Flushing Policy in Early Hash Join
+    Integer MAX_HASH_TABLE_SIZE = 4;
+    HashMap hashTableCollectionR = new HashMap();
 
     HashMap hashTableRS = new HashMap();
     HashMap hashTableRST = new HashMap();
@@ -50,9 +54,8 @@ public class StreamingAlgorithms {
         if (joinType.equals("1M")) {
             switch (whichStream) {
                 case "R":
-
                     if (hashTableS.containsKey(key)) {
-                        System.out.println(String.format("%s, %s, %s", key, value, hashTableS.get(key)));
+                        System.out.println(String.format("R: %s, %s, %s", key, value, hashTableS.get(key)));
                         ArrayList<String> al = new ArrayList<>();
                         al.add(value);
                         hashTableR.put(key, al);
@@ -65,7 +68,7 @@ public class StreamingAlgorithms {
                     break;
                 case "S":
                     if (hashTableR.containsKey(key)) {
-                        System.out.println(String.format("%s, %s, %s", key, value, hashTableR.get(key)));
+                        System.out.println(String.format("S: %s, %s, %s", key, hashTableR.get(key), value));
                     } else {
                         ArrayList<String> al = new ArrayList<>();
                         al.add(value);
@@ -73,35 +76,93 @@ public class StreamingAlgorithms {
                     }
                     break;
             }
-        } else {
+        } else if (joinType.equals("MM")) {
             // Many to Many
             switch (whichStream) {
                 case "R":
                     if (hashTableS.containsKey(key)) {
-                        System.out.println(String.format("%s, %s, %s", key, value, hashTableS.get(key)));
-                        if (hashTableR.containsKey(key)) {
-                            hashTableR.put(key, ((ArrayList<String>) hashTableR.get(key)).add(value));
-
-                        } else {
-                            hashTableR.put(key, new ArrayList<String>().add(value));
-                        }
-                    } else {
-                        hashTableR.put(key, new ArrayList<String>().add(value));        //WHY INSERT IN R
+                        System.out.println(String.format("R: %s, %s, %s", key, value, hashTableS.get(key)));
                     }
+                    if (hashTableR.containsKey(key)) {
+                        ArrayList<String> arrayList = (ArrayList<String>) hashTableR.get(key);
+                        arrayList.add(value);
+                        hashTableR.put(key, arrayList);
+
+                    } else {
+                        ArrayList<String> arrayList = new ArrayList<>();
+                        arrayList.add(value);
+                        hashTableR.put(key, arrayList);
+                    }
+
                     break;
 
                 case "S":
                     if (hashTableR.containsKey(key)) {
-                        System.out.println(String.format("%s, %s, %s", key, value, hashTableR.get(key)));
-                        if (hashTableS.containsKey(key)) {
-                            hashTableS.put(key, ((ArrayList<String>) hashTableR.get(key)).add(value));
-                        } else {
-                            hashTableS.put(key, new ArrayList<String>().add(value));
-                        }
+                        System.out.println(String.format("S: %s, %s, %s", key, hashTableR.get(key), value));
+                    }
+                    if (hashTableS.containsKey(key)) {
+                        ArrayList<String> arrayList = (ArrayList<String>) hashTableS.get(key);
+                        arrayList.add(value);
+                        hashTableS.put(key, arrayList);
                     } else {
-                        hashTableS.put(key, new ArrayList<String>().add(value));
+                        ArrayList<String> arrayList = new ArrayList<>();
+                        arrayList.add(value);
+                        hashTableS.put(key, arrayList);
                     }
                     break;
+            }
+        }
+
+        // Biased Flushing Policy
+        // Integer hashTableSize = 0;
+//        Long freeMemory = Utils.bytesToMegabytes(Runtime.getRuntime().freeMemory());
+//        //System.out.println("Free Memory: " + freeMemory);
+//        if (hashTableR.size() >= MAX_HASH_TABLE_SIZE && hashTableS.size() >= MAX_HASH_TABLE_SIZE) { // Using it for simulation
+//            String flushTimeStamp = Objects.toString(System.currentTimeMillis());
+//            HashMap<String, ArrayList<String>> hashTableRClone = (HashMap<String, ArrayList<String>>) hashTableR.clone();
+//            hashTableCollectionR.put(flushTimeStamp, hashTableRClone);
+//            try {
+//                FileOutputStream fileOutputStream = new FileOutputStream("FlushOut\\" + flushTimeStamp + ".ser");
+//                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+//                objectOutputStream.writeObject(hashTableS);
+//                objectOutputStream.close();
+//                hashTableR.clear();
+//                hashTableS.clear();
+//            } catch (Exception ex) {
+//                System.out.println(ex.toString());
+//            }
+//        }
+
+        // CleanUp Phase
+//        if (cleanUp[0].equals("Y")) {
+//            try {
+//                System.out.println(whichStream + " CleanUP");
+//                Thread cleanUpThread = new Thread(() -> earlyHashJoinCleanUp(hashTableCollectionR));
+//                cleanUpThread.start();
+//            } catch (Exception ex) {
+//                System.out.println(ex.toString());
+//            }
+//        }
+    }
+
+    public void earlyHashJoinCleanUp(HashMap<String, HashMap<String, ArrayList<String>>> hashTableCollectionR) {
+        for (String fileName : hashTableCollectionR.keySet()
+                ) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream("FlushOut\\" + fileName + ".ser");
+                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+                HashMap<String, ArrayList<String>> hashTableS = (HashMap<String, ArrayList<String>>) objectInputStream.readObject();
+                objectInputStream.close();
+                HashMap<String, ArrayList<String>> hashTableR = hashTableCollectionR.get(fileName);
+                for (String key : hashTableR.keySet()
+                        ) {
+                    if (hashTableS.containsKey(key)) {
+                        System.out.println("EHJ CleanUP: " + key + " " + hashTableR.get(key) + " " + hashTableS.get(key));
+                    }
+                    else{System.out.println("EHJ CleanUP: Key = " + key + ", NO MATCH FOUND");}
+                }
+            } catch (Exception ex) {
+                System.out.println(ex.toString());
             }
         }
     }
@@ -113,7 +174,7 @@ public class StreamingAlgorithms {
                 case "R":
                     integerTimeStamp += 1;
                     if (hashTableR.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableR.put(key, arrayList);
@@ -132,7 +193,7 @@ public class StreamingAlgorithms {
                 case "S":
                     integerTimeStamp += 1;
                     if (hashTableS.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableS.put(key, arrayList);
@@ -151,7 +212,7 @@ public class StreamingAlgorithms {
                 case "T":
                     integerTimeStamp += 1;
                     if (hashTableT.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableT.put(key, arrayList);
@@ -170,7 +231,7 @@ public class StreamingAlgorithms {
                 case "U":
                     integerTimeStamp += 1;
                     if (hashTableU.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableU.put(key, arrayList);
@@ -199,7 +260,7 @@ public class StreamingAlgorithms {
                 case "R":
                     integerTimeStamp += 1;
                     if (hashTableR.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableR.put(key, arrayList);
@@ -227,7 +288,7 @@ public class StreamingAlgorithms {
                 case "S":
                     integerTimeStamp += 1;
                     if (hashTableS.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableS.put(key, arrayList);
@@ -240,7 +301,7 @@ public class StreamingAlgorithms {
 
                     if (indirectPartitionMapper.containsKey(value)) {
                         // used for mapping in stream T
-                        ArrayList<Pair<String,String>> arrayList = (ArrayList<Pair<String,String>>) indirectPartitionMapper.get(value);
+                        ArrayList<Pair<String, String>> arrayList = (ArrayList<Pair<String, String>>) indirectPartitionMapper.get(value);
                         Pair<String, String> pair = new Pair<>(value, key);
                         arrayList.add(pair);
                         indirectPartitionMapper.put(value, arrayList);
@@ -258,7 +319,7 @@ public class StreamingAlgorithms {
                 case "T":
                     integerTimeStamp += 1;
                     if (hashTableT.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableT.put(key, arrayList);
@@ -281,7 +342,7 @@ public class StreamingAlgorithms {
                 case "U":
                     integerTimeStamp += 1;
                     if (hashTableU.containsKey(key)) {
-                        ArrayList<Triplet<Integer, String,String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key);
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key);
                         Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
                         arrayList.add(triplet);
                         hashTableU.put(key, arrayList);
