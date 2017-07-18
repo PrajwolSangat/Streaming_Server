@@ -1,6 +1,7 @@
 package edu.monash;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -16,32 +17,42 @@ public class StreamingServer {
         try {
             //System.out.println("Streaming Server is listening ...");
             connectionSocket = serverSocket.accept();
-            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-            String messageRead = inFromClient.readLine();
-            String streamName = messageRead.split(":")[0];
 
-            String key = messageRead.split(":")[1];
-            String value = messageRead.split(":")[2];
-            Algorithm algorithm = Algorithm.valueOf(messageRead.split(":")[3]);
-            switch (streamName) {
-                case "R":
-                    System.out.println("=========================" + streamName);
-                    executeJoins(algorithm, key, value, streamName);
-                    break;
-                case "S":
-                    System.out.println(streamName);
-                    executeJoins(algorithm, key, value, streamName);
-                    break;
-                case "T":
-                    executeJoins(algorithm, key, value, streamName);
-                    break;
-                case "U":
-                    executeJoins(algorithm, key, value, streamName);
-                    break;
-
-            }
+            //START THREAD
+            Thread thread = new Thread(() -> receiveTuples(connectionSocket));
+            thread.start();
         } catch (Exception ex) {
 
+        }
+    }
+
+    private void receiveTuples(Socket socket) {
+        try {
+            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            String messageRead;
+            while ((messageRead = inFromClient.readLine()) != null) {
+                String streamName = messageRead.split(":")[0];
+                String key = messageRead.split(":")[1];
+                String value = messageRead.split(":")[2];
+                Algorithm algorithm = Algorithm.valueOf(messageRead.split(":")[3]);
+
+                switch (streamName) {
+                    case "R":
+                        executeJoins(algorithm, key, value, streamName);
+                        break;
+                    case "S":
+                        executeJoins(algorithm, key, value, streamName);
+                        break;
+                    case "T":
+                        executeJoins(algorithm, key, value, streamName);
+                        break;
+                    case "U":
+                        executeJoins(algorithm, key, value, streamName);
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -50,10 +61,14 @@ public class StreamingServer {
             case AMJOIN:
                 break;
             case EHJOIN:
-                streamingAlgorithms.earlyHashJoin(key, value, "1M", streamName);
+                if (key.equals("CLEANUP")) {
+                    streamingAlgorithms.earlyHashJoinCleanUp(streamingAlgorithms.hashTableCollectionR);
+                } else {
+                    streamingAlgorithms.earlyHashJoin(key, value, "MM", streamName);
+                }
                 break;
             case SLICEJOIN:
-                streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
+                streamingAlgorithms.sliceJoin(key, value, "DA", streamName);
                 break;
             case XJOIN:
                 break;
