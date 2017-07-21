@@ -20,25 +20,142 @@ public class StreamingAlgorithms {
 
     public void xJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
+
+            ArrayList<Triplet> arrayList = new ArrayList<>();
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
                 case "R":
                     integerTimeStamp += 1;
-                    ArrayList<Triplet> arrayList = new ArrayList<>();
+                    // INSERT INTO STREAM HASH TABLE
                     if (hashTableR.containsKey(key)) {
                         hashTableR.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
                     } else {
-                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
-                        arrayList.add(triplet);
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
                         hashTableR.put(key, arrayList);
                     }
-                    //TODO
+                    //PROBE WITH S STREAM HT
+                    if (hashTableS.containsKey(key)) {
+                        //INSERT INTO hashTableRS
+
+                        //PROBE WITH T STREAM HT
+                        if (hashTableT.containsKey(key)) {
+                            //INSERT INTO hashTableRST
+
+                            //PROBE WITH U STREAM HT
+                            if (hashTableU.containsKey(key)) {
+                                // PRINT RESULT
+                            }
+                        }
+                    }
                     break;
                 case "S":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableS.containsKey(key)) {
+                        hashTableS.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableS.put(key, arrayList);
+                    }
+                    //PROBE WITH R STREAM HT
+                    if (hashTableR.containsKey(key)) {
+                        //INSERT INTO hashTableRS
+
+                        //PROBE WITH T STREAM HT
+                        if (hashTableT.containsKey(key)) {
+                            //INSERT INTO hashTableRST
+
+                            //PROBE WITH U STREAM HT
+                            if (hashTableU.containsKey(key)) {
+                                // PRINT RESULT
+                            }
+                        }
+                    }
                     break;
                 case "T":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableT.containsKey(key)) {
+                        hashTableT.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableT.put(key, arrayList);
+                    }
+                    //PROBE WITH RS STREAM HT
+                    if (hashTableRS.containsKey(key)) {
+                        //INSERT INTO hashTableRST
+
+                        //PROBE WITH U STREAM HT
+                        if (hashTableU.containsKey(key)) {
+                            // PRINT RESULT
+                        }
+                    }
                     break;
                 case "U":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableU.containsKey(key)) {
+                        hashTableU.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableU.put(key, arrayList);
+                    }
+                    //PROBE WITH RS STREAM HT
+                    if (hashTableRST.containsKey(key)) {
+                        // PRINT RESULT
+
+                    }
+                    break;
+            }
+        }
+    }
+
+    public void mJoin(String key, String value, String joinType, String whichStream) {
+        if (joinType.equals("CA")) {
+            ArrayList<Triplet<Integer, String, String>> arrayList = new ArrayList<>();
+            switch (whichStream) {
+                // Common Attribute Join [Key is the common attribute]
+
+
+                case "R":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableR.containsKey(key)) {
+                        hashTableR.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableR.put(key, arrayList);
+                    }
+                    break;
+                case "S":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableS.containsKey(key)) {
+                        hashTableS.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableS.put(key, arrayList);
+                    }
+                    break;
+                case "T":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableT.containsKey(key)) {
+                        hashTableT.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableT.put(key, arrayList);
+                    }
+                    break;
+                case "U":
+                    integerTimeStamp += 1;
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableU.containsKey(key)) {
+                        hashTableU.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                    } else {
+                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
+                        hashTableU.put(key, arrayList);
+                    }
                     break;
             }
         }
