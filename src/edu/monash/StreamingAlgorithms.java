@@ -14,8 +14,9 @@ public class StreamingAlgorithms {
     HashMap indirectPartitionMapper = new HashMap();
 
     // Used for Biased Flushing Policy in Early Hash Join
-    Integer MAX_HASH_TABLE_SIZE = 4;
+    Integer MAX_HASH_TABLE_SIZE = 30;
     HashMap hashTableCollectionR = new HashMap();
+    HashMap hashTableCollectionS = new HashMap();
 
     HashMap hashTableRS = new HashMap();
     HashMap hashTableRST = new HashMap();
@@ -27,7 +28,7 @@ public class StreamingAlgorithms {
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
                 case "R":
-                    integerTimeStamp += 1;
+                    integerTimeStamp++;
                     ArrayList<Triplet> arrayList = new ArrayList<>();
                     if (hashTableR.containsKey(key)) {
                         hashTableR.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
@@ -54,8 +55,9 @@ public class StreamingAlgorithms {
         if (joinType.equals("1M")) {
             switch (whichStream) {
                 case "R":
+                    integerTimeStamp++;
                     if (hashTableS.containsKey(key)) {
-                        System.out.println(String.format("R: %s, %s, %s", key, value, hashTableS.get(key)));
+                        System.out.println(String.format("R: %s, %s, %s", key, value, hashTableS.get(key).toString()));
                         ArrayList<String> al = new ArrayList<>();
                         al.add(value);
                         hashTableR.put(key, al);
@@ -67,8 +69,9 @@ public class StreamingAlgorithms {
                     }
                     break;
                 case "S":
+                    integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
-                        System.out.println(String.format("S: %s, %s, %s", key, hashTableR.get(key), value));
+                        System.out.println(String.format("S: %s, %s, %s", key, hashTableR.get(key).toString(), value));
                     } else {
                         ArrayList<String> al = new ArrayList<>();
                         al.add(value);
@@ -80,33 +83,39 @@ public class StreamingAlgorithms {
             // Many to Many
             switch (whichStream) {
                 case "R":
+                    integerTimeStamp++;
                     if (hashTableS.containsKey(key)) {
-                        System.out.println(String.format("R: %s, %s, %s", key, value, hashTableS.get(key)));
+                        System.out.println(String.format("R: %s, %s, %s", key, "[" + integerTimeStamp + ", " + value + "]", hashTableS.get(key).toString()));
                     }
                     if (hashTableR.containsKey(key)) {
-                        ArrayList<String> arrayList = (ArrayList<String>) hashTableR.get(key);
-                        arrayList.add(value);
+                        ArrayList<Pair<Integer, String>> arrayList = (ArrayList<Pair<Integer, String>>) hashTableR.get(key);
+                        Pair<Integer, String> pair = new Pair<>(integerTimeStamp, value);
+                        arrayList.add(pair);
                         hashTableR.put(key, arrayList);
 
                     } else {
-                        ArrayList<String> arrayList = new ArrayList<>();
-                        arrayList.add(value);
+                        ArrayList<Pair<Integer, String>> arrayList = new ArrayList<>();
+                        Pair<Integer, String> pair = new Pair<>(integerTimeStamp, value);
+                        arrayList.add(pair);
                         hashTableR.put(key, arrayList);
                     }
 
                     break;
 
                 case "S":
+                    integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
-                        System.out.println(String.format("S: %s, %s, %s", key, hashTableR.get(key), value));
+                        System.out.println(String.format("S: %s, %s, %s", key, hashTableR.get(key).toString(), "[" + integerTimeStamp + ", " + value + "]"));
                     }
                     if (hashTableS.containsKey(key)) {
-                        ArrayList<String> arrayList = (ArrayList<String>) hashTableS.get(key);
-                        arrayList.add(value);
+                        ArrayList<Pair<Integer, String>> arrayList = (ArrayList<Pair<Integer, String>>) hashTableS.get(key);
+                        Pair<Integer, String> pair = new Pair<>(integerTimeStamp, value);
+                        arrayList.add(pair);
                         hashTableS.put(key, arrayList);
                     } else {
-                        ArrayList<String> arrayList = new ArrayList<>();
-                        arrayList.add(value);
+                        ArrayList<Pair<Integer, String>> arrayList = new ArrayList<>();
+                        Pair<Integer, String> pair = new Pair<>(integerTimeStamp, value);
+                        arrayList.add(pair);
                         hashTableS.put(key, arrayList);
                     }
                     break;
@@ -115,25 +124,39 @@ public class StreamingAlgorithms {
 
         // Biased Flushing Policy
         // Integer hashTableSize = 0;
-//        Long freeMemory = Utils.bytesToMegabytes(Runtime.getRuntime().freeMemory());
-//        //System.out.println("Free Memory: " + freeMemory);
-//        if (hashTableR.size() >= MAX_HASH_TABLE_SIZE && hashTableS.size() >= MAX_HASH_TABLE_SIZE) { // Using it for simulation
-//            String flushTimeStamp = Objects.toString(System.currentTimeMillis());
-//            HashMap<String, ArrayList<String>> hashTableRClone = (HashMap<String, ArrayList<String>>) hashTableR.clone();
-//            hashTableCollectionR.put(flushTimeStamp, hashTableRClone);
-//            try {
-//                FileOutputStream fileOutputStream = new FileOutputStream("FlushOut\\" + flushTimeStamp + ".ser");
-//                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-//                objectOutputStream.writeObject(hashTableS);
-//                objectOutputStream.close();
-//                hashTableR.clear();
-//                hashTableS.clear();
-//            } catch (Exception ex) {
-//                System.out.println(ex.toString());
-//            }
-//        }
+        //Long freeMemory = Utils.bytesToMegabytes(Runtime.getRuntime().freeMemory());
+        //System.out.println("Free Memory: " + freeMemory);
+        //if (freeMemory <= 150) {
+        if (hashTableS.size() > MAX_HASH_TABLE_SIZE) { // Using it for simulation
+            HashMap<String, ArrayList<Pair<Integer, String>>> hashTableRClone = (HashMap<String, ArrayList<Pair<Integer, String>>>) hashTableR.clone();
+            hashTableCollectionR.put(integerTimeStamp, hashTableRClone);
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream("FlushOut\\S\\" + integerTimeStamp + ".ser");
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(hashTableS.clone());
+                objectOutputStream.close();
+                hashTableR.clear();
+                hashTableS.clear();
+            } catch (Exception ex) {
+                System.out.println(ex.toString());
+            }
+        } else if (hashTableR.size() > MAX_HASH_TABLE_SIZE) {
+            HashMap<String, ArrayList<Pair<Integer, String>>> hashTableSClone = (HashMap<String, ArrayList<Pair<Integer, String>>>) hashTableS.clone();
+            hashTableCollectionS.put(integerTimeStamp, hashTableSClone);
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream("FlushOut\\R\\" + integerTimeStamp + ".ser");
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(hashTableR.clone());
+                objectOutputStream.close();
+                hashTableR.clear();
+                hashTableS.clear();
+            } catch (Exception ex) {
+                System.out.println(ex.toString());
+            }
+        }
+    }
 
-        // CleanUp Phase
+    // CleanUp Phase
 //        if (cleanUp[0].equals("Y")) {
 //            try {
 //                System.out.println(whichStream + " CleanUP");
@@ -143,29 +166,62 @@ public class StreamingAlgorithms {
 //                System.out.println(ex.toString());
 //            }
 //        }
-    }
+    //}
 
-    public void earlyHashJoinCleanUp(HashMap<String, HashMap<String, ArrayList<String>>> hashTableCollectionR) {
-        for (String fileName : hashTableCollectionR.keySet()
-                ) {
-            try {
-                FileInputStream fileInputStream = new FileInputStream("FlushOut\\" + fileName + ".ser");
+    public void earlyHashJoinCleanUp() {
+        HashMap<Integer, HashMap<String, ArrayList<Pair<Integer, String>>>> hashTableCollectionRTemp = (HashMap<Integer, HashMap<String, ArrayList<Pair<Integer, String>>>>) hashTableCollectionR;
+        HashMap<Integer, HashMap<String, ArrayList<Pair<Integer, String>>>> hashTableCollectionSTemp = (HashMap<Integer, HashMap<String, ArrayList<Pair<Integer, String>>>>) hashTableCollectionS;
+        try {
+            File[] rStreamFiles = new File("FlushOut\\R\\").listFiles();
+            File[] sStreamFiles = new File("FlushOut\\S\\").listFiles();
+            for (File rStreamFile : rStreamFiles
+                    ) {
+                FileInputStream fileInputStream = new FileInputStream(rStreamFile);
                 ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-                HashMap<String, ArrayList<String>> hashTableS = (HashMap<String, ArrayList<String>>) objectInputStream.readObject();
+                HashMap<String, ArrayList<Pair<Integer, String>>> hashTableR = (HashMap<String, ArrayList<Pair<Integer, String>>>) objectInputStream.readObject();
                 objectInputStream.close();
-                HashMap<String, ArrayList<String>> hashTableR = hashTableCollectionR.get(fileName);
-                for (String key : hashTableR.keySet()
-                        ) {
-                    if (hashTableS.containsKey(key)) {
-                        System.out.println("EHJ CleanUP: " + key + " " + hashTableR.get(key) + " " + hashTableS.get(key));
-                    }
-                    else{System.out.println("EHJ CleanUP: Key = " + key + ", NO MATCH FOUND");}
+                hashTableCollectionRTemp.put(Integer.parseInt(rStreamFile.getName().substring(0, rStreamFile.getName().indexOf('.'))), hashTableR);
+                if (!rStreamFile.isDirectory()) {
+                    rStreamFile.delete();
                 }
-            } catch (Exception ex) {
-                System.out.println(ex.toString());
             }
+            for (File sStreamFile : sStreamFiles
+                    ) {
+                FileInputStream fileInputStream = new FileInputStream(sStreamFile);
+                ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+                HashMap<String, ArrayList<Pair<Integer, String>>> hashTableS = (HashMap<String, ArrayList<Pair<Integer, String>>>) objectInputStream.readObject();
+                objectInputStream.close();
+                hashTableCollectionSTemp.put(Integer.parseInt(sStreamFile.getName().substring(0, sStreamFile.getName().indexOf('.'))), hashTableS);
+                if (!sStreamFile.isDirectory()) {
+                    sStreamFile.delete();
+                }
+            }
+
+            for (Integer sKey : hashTableCollectionSTemp.keySet()
+                    ) {
+                for (Integer rKey : hashTableCollectionRTemp.keySet()
+                        ) {
+                    if (!sKey.equals(rKey)) {
+                        HashMap<String, ArrayList<Pair<Integer, String>>> hashTableS = hashTableCollectionSTemp.get(sKey);
+                        HashMap<String, ArrayList<Pair<Integer, String>>> hashTableR = hashTableCollectionRTemp.get(rKey);
+                        for (String key : hashTableS.keySet()
+                                ) {
+                            if (hashTableR.containsKey(key)) {
+                                System.out.println("EHJ CleanUP: " + key + ", " + hashTableR.get(key) + ", " + hashTableS.get(key));
+                            }
+                        }
+                    } else {
+                        HashMap<String, ArrayList<Pair<Integer, String>>> hashTableS = hashTableCollectionSTemp.get(sKey);
+                        HashMap<String, ArrayList<Pair<Integer, String>>> hashTableR = hashTableCollectionRTemp.get(rKey);
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
         }
     }
+
 
     public void sliceJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
