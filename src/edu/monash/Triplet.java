@@ -1,9 +1,11 @@
 package edu.monash;
 
+import java.io.Serializable;
+
 /**
  * Created by psangats on 7/07/2017.
  */
-public class Triplet<T, U, V> {
+public class Triplet<T, U, V> implements Serializable{
 
     private final T first;
     private final U second;
@@ -27,7 +29,8 @@ public class Triplet<T, U, V> {
         return third;
     }
 
+    @Override
     public String toString() {
-        return "<" + getFirst().toString() + "," + getSecond().toString() + "," + getThird().toString() + ">";
+        return  getFirst() + ", " + getSecond()+ ", " + getThird();
     }
 }
