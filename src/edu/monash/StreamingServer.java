@@ -59,6 +59,7 @@ public class StreamingServer {
     private void executeJoins(Algorithm algorithm, String key, String value, String streamName) {
         switch (algorithm) {
             case AMJOIN:
+                streamingAlgorithms.amJoin(key, value, "CA", streamName);
                 break;
             case EHJOIN:
                 if (key.equals("CLEANUP")) {
@@ -75,6 +76,7 @@ public class StreamingServer {
             case XJOIN:
                 break;
             case MJOIN:
+                streamingAlgorithms.mJoin(key, value, "CA", streamName);
                 break;
         }
 

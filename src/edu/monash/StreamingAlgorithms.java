@@ -20,24 +20,24 @@ public class StreamingAlgorithms {
 
     HashMap hashTableRS = new HashMap();
     HashMap hashTableRST = new HashMap();
+    HashMap<String,BitSet> hashTableVector = new HashMap();
 
     Integer integerTimeStamp = 0;
 
     public void xJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
-
-            ArrayList<Triplet> arrayList = new ArrayList<>();
+            ArrayList<MjoinTuple<String, String, Integer, Integer>> arrayList = new ArrayList<>();
+            MjoinTuple<String, String, Integer, Integer> mjoinTuple = new MjoinTuple<>(key, value, integerTimeStamp, -1);
+            integerTimeStamp += 1;
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
                 case "R":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableR.containsKey(key)) {
-                        hashTableR.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableR.put(key, arrayList);
+                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableR.get(key);
                     }
+                    arrayList.add(mjoinTuple);
+                    hashTableR.put(key, arrayList);
                     //PROBE WITH S STREAM HT
                     if (hashTableS.containsKey(key)) {
                         //INSERT INTO hashTableRS
@@ -54,14 +54,12 @@ public class StreamingAlgorithms {
                     }
                     break;
                 case "S":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableS.containsKey(key)) {
-                        hashTableS.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableS.put(key, arrayList);
+                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableS.get(key);
                     }
+                    arrayList.add(mjoinTuple);
+                    hashTableS.put(key, arrayList);
                     //PROBE WITH R STREAM HT
                     if (hashTableR.containsKey(key)) {
                         //INSERT INTO hashTableRS
@@ -78,14 +76,12 @@ public class StreamingAlgorithms {
                     }
                     break;
                 case "T":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableT.containsKey(key)) {
-                        hashTableT.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableT.put(key, arrayList);
+                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableT.get(key);
                     }
+                    arrayList.add(mjoinTuple);
+                    hashTableT.put(key, arrayList);
                     //PROBE WITH RS STREAM HT
                     if (hashTableRS.containsKey(key)) {
                         //INSERT INTO hashTableRST
@@ -97,14 +93,12 @@ public class StreamingAlgorithms {
                     }
                     break;
                 case "U":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableU.containsKey(key)) {
-                        hashTableU.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableU.put(key, arrayList);
+                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableU.get(key);
                     }
+                    arrayList.add(mjoinTuple);
+                    hashTableU.put(key, arrayList);
                     //PROBE WITH RS STREAM HT
                     if (hashTableRST.containsKey(key)) {
                         // PRINT RESULT
@@ -115,51 +109,282 @@ public class StreamingAlgorithms {
         }
     }
 
+//    public void mJoin(String key, String value, String joinType, String whichStream) {
+//        if (joinType.equals("CA")) {
+//            HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm_partition = new HashMap<>();
+//            MjoinTuple<String, String, Integer, Integer> quadruplet = new MjoinTuple<>(key, value, integerTimeStamp, -1);
+//            ArrayList<MjoinTuple<String, String, Integer, Integer>> al_quad = new ArrayList<>();
+//            integerTimeStamp += 1;
+//            int keyPartition = Integer.valueOf(key)%5;
+//            switch (whichStream) {
+//                // Common Attribute Join [Key is the common attribute]
+//                case "R":
+//                    // INSERT INTO STREAM HASH TABLE
+//                    if (hashTableR.containsKey(keyPartition)) {
+//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableR.get(keyPartition);
+//                        if (hm_partition.containsKey(key)) {
+//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                        }
+//                    }
+//                    al_quad.add(quadruplet);
+//                    hm_partition.put(key, al_quad);
+//                    hashTableR.put(keyPartition,hm_partition);
+//                    // PROBE WITH OTHER STREAMS
+////                    HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
+//                    HashMap[] orderedMapsR = Utils.getFixedOrder("R",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+//                    if (orderedMapsR[0].containsKey(keyPartition) && orderedMapsR[1].containsKey(keyPartition) && orderedMapsR[2].containsKey(keyPartition)) {
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsR[0].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsR[1].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsR[2].get(keyPartition);
+//                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
+////                            ArrayList<MjoinTuple<String, String, Integer, Integer>> al0 = hm0.get(key);
+////                            ArrayList<MjoinTuple<String, String, Integer, Integer>> al1 = hm1.get(key);
+////                            ArrayList<MjoinTuple<String, String, Integer, Integer>> al2 = hm2.get(key);
+////                            for (MjoinTuple<String, String, Integer, Integer> q0: al0) {
+////                                for (MjoinTuple<String, String, Integer, Integer> q1: al1) {
+////                                    for (MjoinTuple<String, String, Integer, Integer> q2: al2) {
+////                                        System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", key, value, q0, q1, q2));
+////                                    }
+////                                }
+////                            }
+//                            System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hm0.get(key), hm1.get(key), hm2.get(key)));
+//                        }
+//                    }
+//                    break;
+//                case "S":
+//                    // INSERT INTO STREAM HASH TABLE
+//                    if (hashTableS.containsKey(keyPartition)) {
+//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableS.get(keyPartition);
+//                        if (hm_partition.containsKey(key)) {
+//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                        }
+//                    }
+//                    al_quad.add(quadruplet);
+//                    hm_partition.put(key, al_quad);
+//                    hashTableS.put(keyPartition,hm_partition);
+//                    // PROBE WITH OTHER STREAMS
+////                    HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
+//                    HashMap[] orderedMapsS = Utils.getFixedOrder("S",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+//                    if (orderedMapsS[0].containsKey(keyPartition) && orderedMapsS[1].containsKey(keyPartition) && orderedMapsS[2].containsKey(keyPartition)) {
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsS[0].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsS[1].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsS[2].get(keyPartition);
+//                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
+//                            System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hm0.get(key), key, value, hm1.get(key), hm2.get(key)));
+//                        }
+//                    }
+//                    break;
+//                case "T":
+//                    // INSERT INTO STREAM HASH TABLE
+//                    if (hashTableT.containsKey(keyPartition)) {
+//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableT.get(keyPartition);
+//                        if (hm_partition.containsKey(key)) {
+//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                        }
+//                    }
+//                    al_quad.add(quadruplet);
+//                    hm_partition.put(key, al_quad);
+//                    hashTableT.put(keyPartition,hm_partition);
+//                    // PROBE WITH OTHER STREAMS
+////                    HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
+//                    HashMap[] orderedMapsT = Utils.getFixedOrder("T",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+//                    if (orderedMapsT[0].containsKey(keyPartition) && orderedMapsT[1].containsKey(keyPartition) && orderedMapsT[2].containsKey(keyPartition)) {
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsT[0].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsT[1].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsT[2].get(keyPartition);
+//                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
+//                            System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hm0.get(key), hm1.get(key), key, value, hm2.get(key)));
+//                        }
+//                    }
+//                    break;
+//                case "U":
+//                    // INSERT INTO STREAM HASH TABLE
+//                    if (hashTableU.containsKey(keyPartition)) {
+//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableU.get(keyPartition);
+//                        if (hm_partition.containsKey(key)) {
+//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                        }
+//                    }
+//                    al_quad.add(quadruplet);
+//                    hm_partition.put(key, al_quad);
+//                    hashTableU.put(keyPartition,hm_partition);
+//                    // PROBE WITH OTHER STREAMS
+////                    HashMap[] orderedMapsU = Utils.findJoinOrder(hashTableR, hashTableS, hashTableT);
+//                    HashMap[] orderedMapsU = Utils.getFixedOrder("U",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+//                    if (orderedMapsU[0].containsKey(keyPartition) && orderedMapsU[1].containsKey(keyPartition) && orderedMapsU[2].containsKey(keyPartition)) {
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsU[0].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsU[1].get(keyPartition);
+//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsU[2].get(keyPartition);
+//                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
+//                            System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hm0.get(key), hm1.get(key), hm2.get(key), key, value));
+//                        }
+//                    }
+//                    break;
+//            }
+//        }
+//    }
     public void mJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
-            ArrayList<Triplet<Integer, String, String>> arrayList = new ArrayList<>();
+//            HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm_partition = new HashMap<>();
+            MjoinTuple<String, String, Integer, Integer> mjoinTuple = new MjoinTuple<>(key, value, integerTimeStamp, -1);
+            ArrayList<MjoinTuple<String, String, Integer, Integer>> al_quad = new ArrayList<>();
+            integerTimeStamp += 1;
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
-
-
                 case "R":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableR.containsKey(key)) {
-                        hashTableR.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableR.put(key, arrayList);
+                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableR.get(key);
+                    }
+                    al_quad.add(mjoinTuple);
+                    hashTableR.put(key,al_quad);
+                    // PROBE WITH OTHER STREAMS
+    //                    HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
+                    HashMap[] orderedMapsR = Utils.getFixedOrder("R",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+                    if (orderedMapsR[0].containsKey(key) && orderedMapsR[1].containsKey(key) && orderedMapsR[2].containsKey(key)) {
+                        System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "S":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableS.containsKey(key)) {
-                        hashTableS.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableS.put(key, arrayList);
+                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableS.get(key);
+                    }
+                    al_quad.add(mjoinTuple);
+                    hashTableS.put(key,al_quad);
+                    // PROBE WITH OTHER STREAMS
+    //                    HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
+                    HashMap[] orderedMapsS = Utils.getFixedOrder("S",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+                    if (orderedMapsS[0].containsKey(key) && orderedMapsS[1].containsKey(key) && orderedMapsS[2].containsKey(key)) {
+                        System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "T":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableT.containsKey(key)) {
-                        hashTableT.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
-                    } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableT.put(key, arrayList);
+                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableT.get(key);
+                    }
+                    al_quad.add(mjoinTuple);
+                    hashTableT.put(key,al_quad);
+                    // PROBE WITH OTHER STREAMS
+    //                    HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
+                    HashMap[] orderedMapsT = Utils.getFixedOrder("T",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+                    if (orderedMapsT[0].containsKey(key) && orderedMapsT[1].containsKey(key) && orderedMapsT[2].containsKey(key)) {
+                        System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                     }
                     break;
                 case "U":
-                    integerTimeStamp += 1;
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableU.containsKey(key)) {
-                        hashTableU.put(key, ((ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key)).add(new Triplet<>(integerTimeStamp, key, value)));
+                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableU.get(key);
+                    }
+                    al_quad.add(mjoinTuple);
+                    hashTableU.put(key,al_quad);
+                    // PROBE WITH OTHER STREAMS
+                    HashMap[] orderedMapsU = Utils.getFixedOrder("U",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
+                    if (orderedMapsU[0].containsKey(key) && orderedMapsU[1].containsKey(key) && orderedMapsU[2].containsKey(key)) {
+                        System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                    }
+                    break;
+            }
+        }
+    }
+    public void amJoin(String key, String value, String joinType, String whichStream) {
+        if (joinType.equals("CA")) {
+            AMjoinTuple<String, String, Integer> mjoinTuple = new AMjoinTuple<>(key, value, integerTimeStamp);
+            ArrayList<AMjoinTuple<String, String, Integer>> al_tri = new ArrayList<>();
+            integerTimeStamp += 1;
+            switch (whichStream) {
+                case "R":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableR.containsKey(key)) {
+                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableR.get(key);
+                    }
+                    al_tri.add(mjoinTuple);
+                    hashTableR.put(key,al_tri);
+                    // PROBE WITH BIT VECTOR HT
+                    if (hashTableVector.containsKey(key)) {
+                        BitSet vector = hashTableVector.get(key);
+                        // IF THERE IS NO ENTRY -> UPDATE VECTOR
+                        if (!vector.get(0))
+                            vector.set(0);
+                        // IF XOR 1111 -> PROBE WITH OTHER STREAMS
+                        if (vector.equals(Utils.getAllBits())) {
+                            System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                        }
                     } else {
-                        arrayList.add(new Triplet<>(integerTimeStamp, key, value));
-                        hashTableU.put(key, arrayList);
+                        // INSERT INDEX WITH VECTOR
+                        BitSet bs = new BitSet(4); bs.set(0);
+                        hashTableVector.put(key,bs);
+                    }
+                    break;
+                case "S":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableS.containsKey(key)) {
+                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableS.get(key);
+                    }
+                    al_tri.add(mjoinTuple);
+                    hashTableS.put(key,al_tri);
+                    // PROBE WITH BIT VECTOR HT
+                    if (hashTableVector.containsKey(key)) {
+                        BitSet vector = hashTableVector.get(key);
+                        // IF THERE IS NO ENTRY -> UPDATE VECTOR
+                        if (!vector.get(1))
+                            vector.set(1);
+                        // IF XOR 1111 -> PROBE WITH OTHER STREAMS
+                        if (vector.equals(Utils.getAllBits())) {
+                            System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                        }
+                    } else {
+                        // INSERT INDEX WITH VECTOR
+                        BitSet bs = new BitSet(4); bs.set(1);
+                        hashTableVector.put(key,bs);
+                    }
+                    break;
+                case "T":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableT.containsKey(key)) {
+                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableT.get(key);
+                    }
+                    al_tri.add(mjoinTuple);
+                    hashTableT.put(key,al_tri);
+                    // PROBE WITH BIT VECTOR HT
+                    if (hashTableVector.containsKey(key)) {
+                        BitSet vector = hashTableVector.get(key);
+                        // IF THERE IS NO ENTRY -> UPDATE VECTOR
+                        if (!vector.get(2))
+                            vector.set(2);
+                        // IF XOR 1111 -> PROBE WITH OTHER STREAMS
+                        if (vector.equals(Utils.getAllBits())) {
+                            System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                        }
+                    } else {
+                        // INSERT INDEX WITH VECTOR
+                        BitSet bs = new BitSet(4); bs.set(2);
+                        hashTableVector.put(key,bs);
+                    }
+                    break;
+                case "U":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableU.containsKey(key)) {
+                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableU.get(key);
+                    }
+                    al_tri.add(mjoinTuple);
+                    hashTableU.put(key,al_tri);
+                    // PROBE WITH BIT VECTOR HT
+                    if (hashTableVector.containsKey(key)) {
+                        BitSet vector = hashTableVector.get(key);
+                        // IF THERE IS NO ENTRY -> UPDATE VECTOR
+                        if (!vector.get(3))
+                            vector.set(3);
+                        // IF XOR 1111 -> PROBE WITH OTHER STREAMS
+                        if (vector.equals(Utils.getAllBits())) {
+                            System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                        }
+                    } else {
+                        // INSERT INDEX WITH VECTOR
+                        BitSet bs = new BitSet(4); bs.set(3);
+                        hashTableVector.put(key,bs);
                     }
                     break;
             }
