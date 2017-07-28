@@ -18,37 +18,46 @@ public class StreamingAlgorithms {
     HashMap hashTableCollectionR = new HashMap();
     HashMap hashTableCollectionS = new HashMap();
 
-    HashMap hashTableRS = new HashMap();
-    HashMap hashTableRST = new HashMap();
+    HashMap<String,LinkedList<QuadTuple>[]> hashTableRS = new HashMap();
+    HashMap<String,LinkedList<QuadTuple>[]> hashTableRST = new HashMap();
     HashMap<String,BitSet> hashTableVector = new HashMap();
 
     Integer integerTimeStamp = 0;
 
     public void xJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
-            ArrayList<MjoinTuple<String, String, Integer, Integer>> arrayList = new ArrayList<>();
-            MjoinTuple<String, String, Integer, Integer> mjoinTuple = new MjoinTuple<>(key, value, integerTimeStamp, -1);
+            LinkedList<QuadTuple<String, String, Integer, Integer>> ll_quad = new LinkedList<>();
+            QuadTuple<String, String, Integer, Integer> quadTuple = new QuadTuple<>(key, value, integerTimeStamp, -1);
             integerTimeStamp += 1;
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
                 case "R":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableR.containsKey(key)) {
-                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableR.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableR.get(key);
                     }
-                    arrayList.add(mjoinTuple);
-                    hashTableR.put(key, arrayList);
+                    ll_quad.add(quadTuple);
+                    hashTableR.put(key, ll_quad);
                     //PROBE WITH S STREAM HT
                     if (hashTableS.containsKey(key)) {
                         //INSERT INTO hashTableRS
-
+                        if (hashTableRS.containsKey(key)) {
+                            hashTableRS.get(key)[0].add(quadTuple);
+                        } else {
+                            hashTableRS.put(key, new LinkedList[]{ll_quad, new LinkedList<>()});
+                        }
                         //PROBE WITH T STREAM HT
                         if (hashTableT.containsKey(key)) {
                             //INSERT INTO hashTableRST
-
+                            if (hashTableRST.containsKey(key)) {
+                                hashTableRST.get(key)[0].add(quadTuple);
+                            } else {
+                                hashTableRST.put(key, new LinkedList[]{ll_quad, new LinkedList<>(), new LinkedList<>()});
+                            }
                             //PROBE WITH U STREAM HT
                             if (hashTableU.containsKey(key)) {
                                 // PRINT RESULT
+                                System.out.println(String.format("[XOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                             }
                         }
                     }
@@ -56,21 +65,30 @@ public class StreamingAlgorithms {
                 case "S":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableS.containsKey(key)) {
-                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableS.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableS.get(key);
                     }
-                    arrayList.add(mjoinTuple);
-                    hashTableS.put(key, arrayList);
+                    ll_quad.add(quadTuple);
+                    hashTableS.put(key, ll_quad);
                     //PROBE WITH R STREAM HT
                     if (hashTableR.containsKey(key)) {
                         //INSERT INTO hashTableRS
-
+                        if (hashTableRS.containsKey(key)) {
+                            hashTableRS.get(key)[1].add(quadTuple);
+                        } else {
+                            hashTableRS.put(key, new LinkedList[]{new LinkedList<>(), ll_quad});
+                        }
                         //PROBE WITH T STREAM HT
                         if (hashTableT.containsKey(key)) {
                             //INSERT INTO hashTableRST
-
+                            if (hashTableRST.containsKey(key)) {
+                                hashTableRST.get(key)[1].add(quadTuple);
+                            } else {
+                                hashTableRST.put(key, new LinkedList[]{new LinkedList<>(), ll_quad, new LinkedList<>()});
+                            }
                             //PROBE WITH U STREAM HT
                             if (hashTableU.containsKey(key)) {
                                 // PRINT RESULT
+                                System.out.println(String.format("[XOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                             }
                         }
                     }
@@ -78,31 +96,36 @@ public class StreamingAlgorithms {
                 case "T":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableT.containsKey(key)) {
-                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableT.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableT.get(key);
                     }
-                    arrayList.add(mjoinTuple);
-                    hashTableT.put(key, arrayList);
-                    //PROBE WITH RS STREAM HT
+                    ll_quad.add(quadTuple);
+                    hashTableT.put(key, ll_quad);
+                    //PROBE WITH RS HT
                     if (hashTableRS.containsKey(key)) {
                         //INSERT INTO hashTableRST
-
+                        if (hashTableRST.containsKey(key)) {
+                            hashTableRST.get(key)[2].add(quadTuple);
+                        } else {
+                            hashTableRST.put(key, new LinkedList[]{new LinkedList<>(), new LinkedList<>(), ll_quad});
+                        }
                         //PROBE WITH U STREAM HT
                         if (hashTableU.containsKey(key)) {
                             // PRINT RESULT
+                            System.out.println(String.format("[XOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                         }
                     }
                     break;
                 case "U":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableU.containsKey(key)) {
-                        arrayList = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableU.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableU.get(key);
                     }
-                    arrayList.add(mjoinTuple);
-                    hashTableU.put(key, arrayList);
-                    //PROBE WITH RS STREAM HT
+                    ll_quad.add(quadTuple);
+                    hashTableU.put(key, ll_quad);
+                    //PROBE WITH RST HT
                     if (hashTableRST.containsKey(key)) {
                         // PRINT RESULT
-
+                        System.out.println(String.format("[XOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                     }
                     break;
             }
@@ -111,9 +134,9 @@ public class StreamingAlgorithms {
 
 //    public void mJoin(String key, String value, String joinType, String whichStream) {
 //        if (joinType.equals("CA")) {
-//            HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm_partition = new HashMap<>();
-//            MjoinTuple<String, String, Integer, Integer> quadruplet = new MjoinTuple<>(key, value, integerTimeStamp, -1);
-//            ArrayList<MjoinTuple<String, String, Integer, Integer>> al_quad = new ArrayList<>();
+//            HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm_partition = new HashMap<>();
+//            QuadTuple<String, String, Integer, Integer> quadruplet = new QuadTuple<>(key, value, integerTimeStamp, -1);
+//            ArrayList<QuadTuple<String, String, Integer, Integer>> al_quad = new ArrayList<>();
 //            integerTimeStamp += 1;
 //            int keyPartition = Integer.valueOf(key)%5;
 //            switch (whichStream) {
@@ -121,9 +144,9 @@ public class StreamingAlgorithms {
 //                case "R":
 //                    // INSERT INTO STREAM HASH TABLE
 //                    if (hashTableR.containsKey(keyPartition)) {
-//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableR.get(keyPartition);
+//                        hm_partition = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) hashTableR.get(keyPartition);
 //                        if (hm_partition.containsKey(key)) {
-//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                            al_quad = (ArrayList<QuadTuple<String, String, Integer, Integer>>) hm_partition.get(key);
 //                        }
 //                    }
 //                    al_quad.add(quadruplet);
@@ -133,16 +156,16 @@ public class StreamingAlgorithms {
 ////                    HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
 //                    HashMap[] orderedMapsR = Utils.getFixedOrder("R",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
 //                    if (orderedMapsR[0].containsKey(keyPartition) && orderedMapsR[1].containsKey(keyPartition) && orderedMapsR[2].containsKey(keyPartition)) {
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsR[0].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsR[1].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsR[2].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsR[0].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsR[1].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsR[2].get(keyPartition);
 //                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
-////                            ArrayList<MjoinTuple<String, String, Integer, Integer>> al0 = hm0.get(key);
-////                            ArrayList<MjoinTuple<String, String, Integer, Integer>> al1 = hm1.get(key);
-////                            ArrayList<MjoinTuple<String, String, Integer, Integer>> al2 = hm2.get(key);
-////                            for (MjoinTuple<String, String, Integer, Integer> q0: al0) {
-////                                for (MjoinTuple<String, String, Integer, Integer> q1: al1) {
-////                                    for (MjoinTuple<String, String, Integer, Integer> q2: al2) {
+////                            ArrayList<QuadTuple<String, String, Integer, Integer>> al0 = hm0.get(key);
+////                            ArrayList<QuadTuple<String, String, Integer, Integer>> al1 = hm1.get(key);
+////                            ArrayList<QuadTuple<String, String, Integer, Integer>> al2 = hm2.get(key);
+////                            for (QuadTuple<String, String, Integer, Integer> q0: al0) {
+////                                for (QuadTuple<String, String, Integer, Integer> q1: al1) {
+////                                    for (QuadTuple<String, String, Integer, Integer> q2: al2) {
 ////                                        System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", key, value, q0, q1, q2));
 ////                                    }
 ////                                }
@@ -154,9 +177,9 @@ public class StreamingAlgorithms {
 //                case "S":
 //                    // INSERT INTO STREAM HASH TABLE
 //                    if (hashTableS.containsKey(keyPartition)) {
-//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableS.get(keyPartition);
+//                        hm_partition = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) hashTableS.get(keyPartition);
 //                        if (hm_partition.containsKey(key)) {
-//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                            al_quad = (ArrayList<QuadTuple<String, String, Integer, Integer>>) hm_partition.get(key);
 //                        }
 //                    }
 //                    al_quad.add(quadruplet);
@@ -166,9 +189,9 @@ public class StreamingAlgorithms {
 ////                    HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
 //                    HashMap[] orderedMapsS = Utils.getFixedOrder("S",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
 //                    if (orderedMapsS[0].containsKey(keyPartition) && orderedMapsS[1].containsKey(keyPartition) && orderedMapsS[2].containsKey(keyPartition)) {
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsS[0].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsS[1].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsS[2].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsS[0].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsS[1].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsS[2].get(keyPartition);
 //                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
 //                            System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hm0.get(key), key, value, hm1.get(key), hm2.get(key)));
 //                        }
@@ -177,9 +200,9 @@ public class StreamingAlgorithms {
 //                case "T":
 //                    // INSERT INTO STREAM HASH TABLE
 //                    if (hashTableT.containsKey(keyPartition)) {
-//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableT.get(keyPartition);
+//                        hm_partition = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) hashTableT.get(keyPartition);
 //                        if (hm_partition.containsKey(key)) {
-//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                            al_quad = (ArrayList<QuadTuple<String, String, Integer, Integer>>) hm_partition.get(key);
 //                        }
 //                    }
 //                    al_quad.add(quadruplet);
@@ -189,9 +212,9 @@ public class StreamingAlgorithms {
 ////                    HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
 //                    HashMap[] orderedMapsT = Utils.getFixedOrder("T",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
 //                    if (orderedMapsT[0].containsKey(keyPartition) && orderedMapsT[1].containsKey(keyPartition) && orderedMapsT[2].containsKey(keyPartition)) {
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsT[0].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsT[1].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsT[2].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsT[0].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsT[1].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsT[2].get(keyPartition);
 //                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
 //                            System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hm0.get(key), hm1.get(key), key, value, hm2.get(key)));
 //                        }
@@ -200,9 +223,9 @@ public class StreamingAlgorithms {
 //                case "U":
 //                    // INSERT INTO STREAM HASH TABLE
 //                    if (hashTableU.containsKey(keyPartition)) {
-//                        hm_partition = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) hashTableU.get(keyPartition);
+//                        hm_partition = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) hashTableU.get(keyPartition);
 //                        if (hm_partition.containsKey(key)) {
-//                            al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hm_partition.get(key);
+//                            al_quad = (ArrayList<QuadTuple<String, String, Integer, Integer>>) hm_partition.get(key);
 //                        }
 //                    }
 //                    al_quad.add(quadruplet);
@@ -212,9 +235,9 @@ public class StreamingAlgorithms {
 ////                    HashMap[] orderedMapsU = Utils.findJoinOrder(hashTableR, hashTableS, hashTableT);
 //                    HashMap[] orderedMapsU = Utils.getFixedOrder("U",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
 //                    if (orderedMapsU[0].containsKey(keyPartition) && orderedMapsU[1].containsKey(keyPartition) && orderedMapsU[2].containsKey(keyPartition)) {
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsU[0].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsU[1].get(keyPartition);
-//                        HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>>) orderedMapsU[2].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm0 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsU[0].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm1 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsU[1].get(keyPartition);
+//                        HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm2 = (HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>>) orderedMapsU[2].get(keyPartition);
 //                        if (hm0.containsKey(key) && hm1.containsKey(key) && hm2.containsKey(key)){
 //                            System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hm0.get(key), hm1.get(key), hm2.get(key), key, value));
 //                        }
@@ -225,65 +248,65 @@ public class StreamingAlgorithms {
 //    }
     public void mJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
-//            HashMap<String,ArrayList<MjoinTuple<String, String, Integer, Integer>>> hm_partition = new HashMap<>();
-            MjoinTuple<String, String, Integer, Integer> mjoinTuple = new MjoinTuple<>(key, value, integerTimeStamp, -1);
-            ArrayList<MjoinTuple<String, String, Integer, Integer>> al_quad = new ArrayList<>();
+//            HashMap<String,ArrayList<QuadTuple<String, String, Integer, Integer>>> hm_partition = new HashMap<>();
+            QuadTuple<String, String, Integer, Integer> quadTuple = new QuadTuple<>(key, value, integerTimeStamp, -1);
+            LinkedList<QuadTuple<String, String, Integer, Integer>> ll_quad = new LinkedList<>();
             integerTimeStamp += 1;
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
                 case "R":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableR.containsKey(key)) {
-                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableR.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableR.get(key);
                     }
-                    al_quad.add(mjoinTuple);
-                    hashTableR.put(key,al_quad);
+                    ll_quad.add(quadTuple);
+                    hashTableR.put(key,ll_quad);
                     // PROBE WITH OTHER STREAMS
     //                    HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
                     HashMap[] orderedMapsR = Utils.getFixedOrder("R",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsR[0].containsKey(key) && orderedMapsR[1].containsKey(key) && orderedMapsR[2].containsKey(key)) {
-                        System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                        System.out.println(String.format("[MOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "S":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableS.containsKey(key)) {
-                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableS.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableS.get(key);
                     }
-                    al_quad.add(mjoinTuple);
-                    hashTableS.put(key,al_quad);
+                    ll_quad.add(quadTuple);
+                    hashTableS.put(key,ll_quad);
                     // PROBE WITH OTHER STREAMS
     //                    HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
                     HashMap[] orderedMapsS = Utils.getFixedOrder("S",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsS[0].containsKey(key) && orderedMapsS[1].containsKey(key) && orderedMapsS[2].containsKey(key)) {
-                        System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                        System.out.println(String.format("[MOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "T":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableT.containsKey(key)) {
-                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableT.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableT.get(key);
                     }
-                    al_quad.add(mjoinTuple);
-                    hashTableT.put(key,al_quad);
+                    ll_quad.add(quadTuple);
+                    hashTableT.put(key,ll_quad);
                     // PROBE WITH OTHER STREAMS
     //                    HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
                     HashMap[] orderedMapsT = Utils.getFixedOrder("T",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsT[0].containsKey(key) && orderedMapsT[1].containsKey(key) && orderedMapsT[2].containsKey(key)) {
-                        System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                        System.out.println(String.format("[MOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                     }
                     break;
                 case "U":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableU.containsKey(key)) {
-                        al_quad = (ArrayList<MjoinTuple<String, String, Integer, Integer>>) hashTableU.get(key);
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableU.get(key);
                     }
-                    al_quad.add(mjoinTuple);
-                    hashTableU.put(key,al_quad);
+                    ll_quad.add(quadTuple);
+                    hashTableU.put(key,ll_quad);
                     // PROBE WITH OTHER STREAMS
                     HashMap[] orderedMapsU = Utils.getFixedOrder("U",new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsU[0].containsKey(key) && orderedMapsU[1].containsKey(key) && orderedMapsU[2].containsKey(key)) {
-                        System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                        System.out.println(String.format("[MOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                     }
                     break;
             }
@@ -291,17 +314,17 @@ public class StreamingAlgorithms {
     }
     public void amJoin(String key, String value, String joinType, String whichStream) {
         if (joinType.equals("CA")) {
-            AMjoinTuple<String, String, Integer> mjoinTuple = new AMjoinTuple<>(key, value, integerTimeStamp);
-            ArrayList<AMjoinTuple<String, String, Integer>> al_tri = new ArrayList<>();
+            TriTuple<String, String, Integer> triTuple = new TriTuple<>(key, value, integerTimeStamp);
+            LinkedList<TriTuple<String, String, Integer>> ll_tri = new LinkedList<>();
             integerTimeStamp += 1;
             switch (whichStream) {
                 case "R":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableR.containsKey(key)) {
-                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableR.get(key);
+                        ll_tri = (LinkedList<TriTuple<String, String, Integer>>) hashTableR.get(key);
                     }
-                    al_tri.add(mjoinTuple);
-                    hashTableR.put(key,al_tri);
+                    ll_tri.add(triTuple);
+                    hashTableR.put(key,ll_tri);
                     // PROBE WITH BIT VECTOR HT
                     if (hashTableVector.containsKey(key)) {
                         BitSet vector = hashTableVector.get(key);
@@ -310,7 +333,7 @@ public class StreamingAlgorithms {
                             vector.set(0);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                            System.out.println(String.format("[AMOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                         }
                     } else {
                         // INSERT INDEX WITH VECTOR
@@ -321,10 +344,10 @@ public class StreamingAlgorithms {
                 case "S":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableS.containsKey(key)) {
-                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableS.get(key);
+                        ll_tri = (LinkedList<TriTuple<String, String, Integer>>) hashTableS.get(key);
                     }
-                    al_tri.add(mjoinTuple);
-                    hashTableS.put(key,al_tri);
+                    ll_tri.add(triTuple);
+                    hashTableS.put(key,ll_tri);
                     // PROBE WITH BIT VECTOR HT
                     if (hashTableVector.containsKey(key)) {
                         BitSet vector = hashTableVector.get(key);
@@ -333,7 +356,7 @@ public class StreamingAlgorithms {
                             vector.set(1);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                            System.out.println(String.format("[AMOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                         }
                     } else {
                         // INSERT INDEX WITH VECTOR
@@ -344,10 +367,10 @@ public class StreamingAlgorithms {
                 case "T":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableT.containsKey(key)) {
-                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableT.get(key);
+                        ll_tri = (LinkedList<TriTuple<String, String, Integer>>) hashTableT.get(key);
                     }
-                    al_tri.add(mjoinTuple);
-                    hashTableT.put(key,al_tri);
+                    ll_tri.add(triTuple);
+                    hashTableT.put(key,ll_tri);
                     // PROBE WITH BIT VECTOR HT
                     if (hashTableVector.containsKey(key)) {
                         BitSet vector = hashTableVector.get(key);
@@ -356,7 +379,7 @@ public class StreamingAlgorithms {
                             vector.set(2);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                            System.out.println(String.format("[AMOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                         }
                     } else {
                         // INSERT INDEX WITH VECTOR
@@ -367,10 +390,10 @@ public class StreamingAlgorithms {
                 case "U":
                     // INSERT INTO STREAM HASH TABLE
                     if (hashTableU.containsKey(key)) {
-                        al_tri = (ArrayList<AMjoinTuple<String, String, Integer>>) hashTableU.get(key);
+                        ll_tri = (LinkedList<TriTuple<String, String, Integer>>) hashTableU.get(key);
                     }
-                    al_tri.add(mjoinTuple);
-                    hashTableU.put(key,al_tri);
+                    ll_tri.add(triTuple);
+                    hashTableU.put(key,ll_tri);
                     // PROBE WITH BIT VECTOR HT
                     if (hashTableVector.containsKey(key)) {
                         BitSet vector = hashTableVector.get(key);
@@ -379,7 +402,7 @@ public class StreamingAlgorithms {
                             vector.set(3);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                            System.out.println(String.format("[AMOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                         }
                     } else {
                         // INSERT INDEX WITH VECTOR

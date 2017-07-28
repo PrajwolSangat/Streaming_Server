@@ -5,13 +5,13 @@ import java.io.Serializable;
 /**
  * Created by psangats on 7/07/2017.
  */
-public class AMjoinTuple<K, V, ATS> implements Serializable{
+public class TriTuple<K, V, ATS> implements Serializable{
 
     private final K key;
     private final V value;
     private final ATS ats;
 
-    public AMjoinTuple(K key, V value, ATS ats) {
+    public TriTuple(K key, V value, ATS ats) {
         this.key = key;
         this.value = value;
         this.ats = ats;

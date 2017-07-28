@@ -5,14 +5,14 @@ import java.io.Serializable;
 /**
  * Created by psangats on 7/07/2017.
  */
-public class MjoinTuple<K, V, ATS, DTS> implements Serializable{
+public class QuadTuple<K, V, ATS, DTS> implements Serializable{
 
     private final K key;
     private final V value;
     private final ATS ats;
     private final DTS dts;
 
-    public MjoinTuple(K key, V value, ATS ats, DTS dts) {
+    public QuadTuple(K key, V value, ATS ats, DTS dts) {
         this.key = key;
         this.value = value;
         this.ats = ats;

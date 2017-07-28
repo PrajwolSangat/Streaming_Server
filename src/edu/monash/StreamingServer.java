@@ -74,6 +74,7 @@ public class StreamingServer {
                 streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
                 break;
             case XJOIN:
+                streamingAlgorithms.xJoin(key, value, "CA", streamName);
                 break;
             case MJOIN:
                 streamingAlgorithms.mJoin(key, value, "CA", streamName);
