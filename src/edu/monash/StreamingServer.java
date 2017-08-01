@@ -64,10 +64,10 @@ public class StreamingServer {
             case EHJOIN:
                 if (key.equals("CLEANUP")) {
                     System.out.println("Received Cleanup Request.");
-                    Thread thread = new Thread(() -> streamingAlgorithms.earlyHashJoinCleanUp());
-                    thread.start();
+//                    Thread thread = new Thread(() -> streamingAlgorithms.earlyHashJoinCleanUp());
+//                    thread.start();
                 } else {
-                    streamingAlgorithms.earlyHashJoin(key, value, "MM", streamName);
+                    streamingAlgorithms.earlyHashJoin(key, value, "1M", streamName);
                 }
                 break;
             case SLICEJOIN:

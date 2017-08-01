@@ -9,7 +9,7 @@ import java.util.TreeMap;
 public class Main {
 
     public static void main(String[] args) {
-        //test2();
+        //test3();
         start();
     }
 
@@ -27,6 +27,15 @@ public class Main {
         }
     }
 
+    public static void test3(){
+        MultiValueMap mvm = new MultiValueMap();
+        mvm.putValue("1", "First");
+        mvm.putValue("2", "Second");
+        mvm.putValue("1", "Third");
+
+        System.out.println(mvm.getValues("1"));
+
+    }
     public void test1() {
         ArrayList<String> a1 = new ArrayList<>();
         a1.add("1");
