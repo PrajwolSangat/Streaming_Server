@@ -1,6 +1,10 @@
 package edu.monash;
 
+import com.sun.javafx.image.IntPixelGetter;
+
+import javax.rmi.CORBA.Util;
 import java.io.*;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
@@ -74,7 +78,7 @@ public class StreamingAlgorithms {
                             //PROBE WITH U STREAM HT
                             if (hashTableU.containsKey(key)) {
                                 // PRINT RESULT
-                                if(isInitialResponse){
+                                if (isInitialResponse) {
                                     initialResponseTimeStamp = System.currentTimeMillis();
                                     isInitialResponse = false;
                                 }
@@ -109,7 +113,7 @@ public class StreamingAlgorithms {
                             //PROBE WITH U STREAM HT
                             if (hashTableU.containsKey(key)) {
                                 // PRINT RESULT
-                                if(isInitialResponse){
+                                if (isInitialResponse) {
                                     initialResponseTimeStamp = System.currentTimeMillis();
                                     isInitialResponse = false;
                                 }
@@ -136,7 +140,7 @@ public class StreamingAlgorithms {
                         //PROBE WITH U STREAM HT
                         if (hashTableU.containsKey(key)) {
                             // PRINT RESULT
-                            if(isInitialResponse){
+                            if (isInitialResponse) {
                                 initialResponseTimeStamp = System.currentTimeMillis();
                                 isInitialResponse = false;
                             }
@@ -154,7 +158,7 @@ public class StreamingAlgorithms {
                     //PROBE WITH RST HT
                     if (hashTableRST.containsKey(key)) {
                         // PRINT RESULT
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -308,7 +312,7 @@ public class StreamingAlgorithms {
                     //                    HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
                     HashMap[] orderedMapsR = Utils.getFixedOrder("R", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsR[0].containsKey(key) && orderedMapsR[1].containsKey(key) && orderedMapsR[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -326,7 +330,7 @@ public class StreamingAlgorithms {
                     //                    HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
                     HashMap[] orderedMapsS = Utils.getFixedOrder("S", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsS[0].containsKey(key) && orderedMapsS[1].containsKey(key) && orderedMapsS[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -344,7 +348,7 @@ public class StreamingAlgorithms {
                     //                    HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
                     HashMap[] orderedMapsT = Utils.getFixedOrder("T", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsT[0].containsKey(key) && orderedMapsT[1].containsKey(key) && orderedMapsT[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -361,7 +365,96 @@ public class StreamingAlgorithms {
                     // PROBE WITH OTHER STREAMS
                     HashMap[] orderedMapsU = Utils.getFixedOrder("U", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
                     if (orderedMapsU[0].containsKey(key) && orderedMapsU[1].containsKey(key) && orderedMapsU[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[MOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                    }
+                    break;
+            }
+        }
+    }
+
+    public void mJoinWithOptimalJoinOrdering(String key, String value, String joinType, String whichStream) {
+        if (joinType.equals("CA")) {
+            if (isFirst) {
+                initialArrivalTimeStamp = System.currentTimeMillis();
+                isFirst = false;
+            }
+            QuadTuple<String, String, Integer, Integer> quadTuple = new QuadTuple<>(key, value, integerTimeStamp, -1);
+            LinkedList<QuadTuple<String, String, Integer, Integer>> ll_quad = new LinkedList<>();
+            integerTimeStamp += 1;
+            switch (whichStream) {
+                // Common Attribute Join [Key is the common attribute]
+                case "R":
+                    if (key.equals("COMPLETE")) {
+                        finalArrivalTimeStamp = System.currentTimeMillis();
+                        System.out.println("[MJOIN] Execution Time: " + (finalArrivalTimeStamp - initialArrivalTimeStamp) / 1000 + " Secs");
+                        System.out.println("[MJOIN] Initial Response Time: " + (initialResponseTimeStamp - initialArrivalTimeStamp) / 1000.0000 + " Secs");
+                        return;
+                    }
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableR.containsKey(key)) {
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableR.get(key);
+                    }
+                    ll_quad.add(quadTuple);
+                    hashTableR.put(key, ll_quad);
+                    // PROBE WITH OTHER STREAMS
+                    //                    HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
+                    List<Pair<Integer, HashMap>> orderedMapsR = Utils.findOptimalJoinOrder(hashTableS, hashTableU, hashTableT);
+                    if (orderedMapsR.get(0)._2().containsKey(key) && orderedMapsR.get(1)._2().containsKey(key) && orderedMapsR.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[MOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                    }
+                    break;
+                case "S":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableS.containsKey(key)) {
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableS.get(key);
+                    }
+                    ll_quad.add(quadTuple);
+                    hashTableS.put(key, ll_quad);
+                    List<Pair<Integer, HashMap>> orderedMapsS = Utils.findOptimalJoinOrder(hashTableR, hashTableT, hashTableU);
+                    if (orderedMapsS.get(0)._2().containsKey(key) && orderedMapsS.get(1)._2().containsKey(key) && orderedMapsS.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[MOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                    }
+                    break;
+                case "T":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableT.containsKey(key)) {
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableT.get(key);
+                    }
+                    ll_quad.add(quadTuple);
+                    hashTableT.put(key, ll_quad);
+                    // PROBE WITH OTHER STREAMS
+                    List<Pair<Integer, HashMap>> orderedMapsT = Utils.findOptimalJoinOrder(hashTableR, hashTableS, hashTableU);
+                    if (orderedMapsT.get(0)._2().containsKey(key) && orderedMapsT.get(1)._2().containsKey(key) && orderedMapsT.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[MOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                    }
+                    break;
+                case "U":
+                    // INSERT INTO STREAM HASH TABLE
+                    if (hashTableU.containsKey(key)) {
+                        ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableU.get(key);
+                    }
+                    ll_quad.add(quadTuple);
+                    hashTableU.put(key, ll_quad);
+                    // PROBE WITH OTHER STREAMS
+                    List<Pair<Integer,HashMap>> orderedMapsU = Utils.findOptimalJoinOrder(hashTableR,hashTableS,hashTableT);
+                    if (orderedMapsU.get(0)._2().containsKey(key) && orderedMapsU.get(1)._2().containsKey(key) && orderedMapsU.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -403,7 +496,7 @@ public class StreamingAlgorithms {
                             vector.set(0);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            if(isInitialResponse){
+                            if (isInitialResponse) {
                                 initialResponseTimeStamp = System.currentTimeMillis();
                                 isInitialResponse = false;
                             }
@@ -431,7 +524,7 @@ public class StreamingAlgorithms {
                             vector.set(1);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            if(isInitialResponse){
+                            if (isInitialResponse) {
                                 initialResponseTimeStamp = System.currentTimeMillis();
                                 isInitialResponse = false;
                             }
@@ -459,7 +552,7 @@ public class StreamingAlgorithms {
                             vector.set(2);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            if(isInitialResponse){
+                            if (isInitialResponse) {
                                 initialResponseTimeStamp = System.currentTimeMillis();
                                 isInitialResponse = false;
                             }
@@ -487,7 +580,7 @@ public class StreamingAlgorithms {
                             vector.set(3);
                         // IF XOR 1111 -> PROBE WITH OTHER STREAMS
                         if (vector.equals(Utils.getAllBits())) {
-                            if(isInitialResponse){
+                            if (isInitialResponse) {
                                 initialResponseTimeStamp = System.currentTimeMillis();
                                 isInitialResponse = false;
                             }
@@ -521,7 +614,7 @@ public class StreamingAlgorithms {
                     }
                     integerTimeStamp++;
                     if (hashTableS.containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -539,7 +632,7 @@ public class StreamingAlgorithms {
                 case "S":
                     integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -563,7 +656,7 @@ public class StreamingAlgorithms {
                     }
                     integerTimeStamp++;
                     if (hashTableS.containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -587,7 +680,7 @@ public class StreamingAlgorithms {
                 case "S":
                     integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -641,18 +734,6 @@ public class StreamingAlgorithms {
 //            }
 //        }
     }
-
-    // CleanUp Phase
-//        if (cleanUp[0].equals("Y")) {
-//            try {
-//                System.out.println(whichStream + " CleanUP");
-//                Thread cleanUpThread = new Thread(() -> earlyHashJoinCleanUp(hashTableCollectionR));
-//                cleanUpThread.start();
-//            } catch (Exception ex) {
-//                System.out.println(ex.toString());
-//            }
-//        }
-    //}
 
     public void earlyHashJoinCleanUp() {
         HashMap<Integer, HashMap<String, ArrayList<Pair<Integer, String>>>> hashTableCollectionRTemp = (HashMap<Integer, HashMap<String, ArrayList<Pair<Integer, String>>>>) hashTableCollectionR;
@@ -708,7 +789,6 @@ public class StreamingAlgorithms {
         }
     }
 
-
     public void sliceJoin(String key, String value, String joinType, String whichStream) {
         if (isFirst) {
             initialArrivalTimeStamp = System.currentTimeMillis();
@@ -737,9 +817,9 @@ public class StreamingAlgorithms {
                         hashTableR.put(key, arrayList);
                     }
                     HashMap[] orderedMapsR = Utils.getFixedOrder("R", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
-                   // HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
+                    // HashMap[] orderedMapsR = Utils.findJoinOrder(hashTableS, hashTableT, hashTableU);
                     if (orderedMapsR[0].containsKey(key) && orderedMapsR[1].containsKey(key) && orderedMapsR[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -760,9 +840,9 @@ public class StreamingAlgorithms {
                         hashTableS.put(key, arrayList);
                     }
                     HashMap[] orderedMapsS = Utils.getFixedOrder("S", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
-                   // HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
+                    // HashMap[] orderedMapsS = Utils.findJoinOrder(hashTableR, hashTableT, hashTableU);
                     if (orderedMapsS[0].containsKey(key) && orderedMapsS[1].containsKey(key) && orderedMapsS[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -784,9 +864,9 @@ public class StreamingAlgorithms {
                     }
 
                     HashMap[] orderedMapsT = Utils.getFixedOrder("T", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
-                   // HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
+                    // HashMap[] orderedMapsT = Utils.findJoinOrder(hashTableR, hashTableS, hashTableU);
                     if (orderedMapsT[0].containsKey(key) && orderedMapsT[1].containsKey(key) && orderedMapsT[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -807,9 +887,9 @@ public class StreamingAlgorithms {
                         hashTableU.put(key, arrayList);
                     }
                     HashMap[] orderedMapsU = Utils.getFixedOrder("U", new HashMap[]{hashTableR, hashTableS, hashTableT, hashTableU});
-                   // HashMap[] orderedMapsU = Utils.findJoinOrder(hashTableR, hashTableT, hashTableS);
+                    // HashMap[] orderedMapsU = Utils.findJoinOrder(hashTableR, hashTableT, hashTableS);
                     if (orderedMapsU[0].containsKey(key) && orderedMapsU[1].containsKey(key) && orderedMapsU[2].containsKey(key)) {
-                        if(isInitialResponse){
+                        if (isInitialResponse) {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
@@ -923,6 +1003,230 @@ public class StreamingAlgorithms {
                     }
                     HashMap[] orderedMapsU = Utils.findJoinOrder(hashTableR, hashTableS);
                     if (orderedMapsU[0].containsKey(key) && orderedMapsU[1].containsKey(key)) {
+                        // implementation of slice mapping
+                        ArrayList<Triplet<Integer, String, String>> mappingList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
+                        for (Triplet triplet : mappingList
+                                ) {
+                            if (hashTableT.containsKey(triplet.getThird())) {
+                                System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), mappingList, hashTableT.get(triplet.getThird()), key, value));
+                            }
+                        }
+                        // implementation of slice mapping complete
+                    }
+                    break;
+            }
+        }
+    }
+
+    public void sliceJoinWithOptimalJoinOrder(String key, String value, String joinType, String whichStream) {
+        if (isFirst) {
+            initialArrivalTimeStamp = System.currentTimeMillis();
+            isFirst = false;
+        }
+        if (joinType.equals("CA")) {
+            switch (whichStream) {
+                // Common Attribute Join [Key is the common attribute]
+                case "R":
+                    if (key.equals("COMPLETE")) {
+                        finalArrivalTimeStamp = System.currentTimeMillis();
+                        System.out.println("[SLICE JOIN] Execution Time: " + (finalArrivalTimeStamp - initialArrivalTimeStamp) / 1000 + " Secs");
+                        System.out.println("[SLICE JOIN] Initial Response Time: " + (initialResponseTimeStamp - initialArrivalTimeStamp) / 1000.0000 + " Secs");
+                        return;
+                    }
+                    integerTimeStamp += 1;
+                    if (hashTableR.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableR.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableR.put(key, arrayList);
+                    }
+                    List<Pair<Integer, HashMap>> orderedMapsR = Utils.findOptimalJoinOrder(hashTableS, hashTableT, hashTableU);
+                    if (orderedMapsR.get(0)._2().containsKey(key) && orderedMapsR.get(1)._2().containsKey(key) && orderedMapsR.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                    }
+                    break;
+                case "S":
+                    integerTimeStamp += 1;
+                    if (hashTableS.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableS.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableS.put(key, arrayList);
+                    }
+                    List<Pair<Integer, HashMap>> orderedMapsS = Utils.findOptimalJoinOrder(hashTableR, hashTableT, hashTableU);
+                    if (orderedMapsS.get(0)._2().containsKey(key) && orderedMapsS.get(1)._2().containsKey(key) && orderedMapsS.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                    }
+                    break;
+                case "T":
+                    integerTimeStamp += 1;
+                    if (hashTableT.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableT.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableT.put(key, arrayList);
+                    }
+
+                    List<Pair<Integer, HashMap>> orderedMapsT = Utils.findOptimalJoinOrder(hashTableR, hashTableS, hashTableU);
+                    if (orderedMapsT.get(0)._2().containsKey(key) && orderedMapsT.get(1)._2().containsKey(key) && orderedMapsT.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                    }
+                    break;
+                case "U":
+                    integerTimeStamp += 1;
+                    if (hashTableU.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableU.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableU.put(key, arrayList);
+                    }
+                    List<Pair<Integer, HashMap>> orderedMapsU = Utils.findOptimalJoinOrder(hashTableR, hashTableT, hashTableS);
+                    if (orderedMapsU.get(0)._2().containsKey(key) && orderedMapsU.get(1)._2().containsKey(key) && orderedMapsU.get(2)._2().containsKey(key)) {
+                        if (isInitialResponse) {
+                            initialResponseTimeStamp = System.currentTimeMillis();
+                            isInitialResponse = false;
+                        }
+                        System.out.println(String.format("[Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                    }
+                    break;
+            }
+        } else {
+            // Distinct Attribute Join using mapping function
+            // R -> (a,b)
+            // S -> (a,c)
+            // T -> (c,d)
+            // U -> (a,e)
+
+            switch (whichStream) {
+                case "R":
+                    integerTimeStamp += 1;
+                    if (hashTableR.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableR.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableR.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableR.put(key, arrayList);
+                    }
+
+                    // Using Simple Heuristics to find the join order
+                    List<Pair<Integer, HashMap>> orderedMapsR = Utils.findOptimalJoinOrder(hashTableU, hashTableS);
+                    if (orderedMapsR.get(0)._2().containsKey(key) && orderedMapsR.get(1)._2().containsKey(key)) {
+                        // implementation of slice mapping
+                        ArrayList<Triplet<Integer, String, String>> mappingList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key); // list buffer of key values
+                        for (Triplet triplet :
+                                mappingList) {
+                            if (hashTableT.containsKey(triplet.getSecond())) {
+                                System.out.println(String.format("[Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                            }
+                        }
+                    }
+                    // implementation of slice mapping complete
+                    break;
+                case "S":
+                    integerTimeStamp += 1;
+                    if (hashTableS.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableS.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableS.put(key, arrayList);
+                    }
+
+                    if (indirectPartitionMapper.containsKey(value)) {
+                        // used for mapping in stream T
+                        ArrayList<Pair<String, String>> arrayList = (ArrayList<Pair<String, String>>) indirectPartitionMapper.get(value);
+                        Pair<String, String> pair = new Pair<>(value, key);
+                        arrayList.add(pair);
+                        indirectPartitionMapper.put(value, arrayList);
+                    } else {
+                        ArrayList<Pair> arrayList = new ArrayList<>();
+                        Pair<String, String> pair = new Pair<>(value, key);
+                        arrayList.add(pair);
+                        indirectPartitionMapper.put(value, arrayList);
+                    }
+                    List<Pair<Integer, HashMap>> orderedMapsS = Utils.findOptimalJoinOrder(hashTableR, hashTableT, hashTableU);
+                    if (orderedMapsS.get(0)._2().containsKey(key) && orderedMapsS.get(1)._2().containsKey(key) && orderedMapsS.get(2)._2().containsKey(key)) {
+                        System.out.println(String.format("[Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                    }
+                    break;
+                case "T":
+                    integerTimeStamp += 1;
+                    if (hashTableT.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableT.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableT.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableT.put(key, arrayList);
+                    }
+                    if (indirectPartitionMapper.containsKey(key)) {
+                        ArrayList<Pair<String, String>> mappingList = (ArrayList<Pair<String, String>>) indirectPartitionMapper.get(key);
+                        List<Pair<Integer, HashMap>> orderedMapsT = Utils.findOptimalJoinOrder(hashTableR, hashTableU);
+                        for (Pair pair : mappingList) {
+                            if (orderedMapsT.get(0)._2().containsKey(pair._2()) && orderedMapsT.get(1)._2().containsKey(pair._2())) {
+                                System.out.println(String.format("[Output T]:  %s, %s, %s, %s, %s", hashTableR.get(pair._2()), hashTableS.get(pair._2()), pair._1(), pair._2(), hashTableU.get(pair._2())));
+                            }
+                        }
+                    }
+                    break;
+                case "U":
+                    integerTimeStamp += 1;
+                    if (hashTableU.containsKey(key)) {
+                        ArrayList<Triplet<Integer, String, String>> arrayList = (ArrayList<Triplet<Integer, String, String>>) hashTableU.get(key);
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableU.put(key, arrayList);
+                    } else {
+                        ArrayList<Triplet> arrayList = new ArrayList<>();
+                        Triplet<Integer, String, String> triplet = new Triplet<>(integerTimeStamp, key, value);
+                        arrayList.add(triplet);
+                        hashTableU.put(key, arrayList);
+                    }
+                    List<Pair<Integer, HashMap>> orderedMapsU = Utils.findOptimalJoinOrder(hashTableR, hashTableS);
+                    if (orderedMapsU.get(0)._2().containsKey(key) && orderedMapsU.get(1)._2().containsKey(key)) {
                         // implementation of slice mapping
                         ArrayList<Triplet<Integer, String, String>> mappingList = (ArrayList<Triplet<Integer, String, String>>) hashTableS.get(key);
                         for (Triplet triplet : mappingList

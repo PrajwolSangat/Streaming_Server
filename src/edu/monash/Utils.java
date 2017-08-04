@@ -1,9 +1,6 @@
 package edu.monash;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by psangats on 12/07/2017.
@@ -28,6 +25,16 @@ public final class Utils {
 
     public static long bytesToMegabytes(long bytes) {
         return bytes / MEGABYTE;
+    }
+
+    public static List<Pair<Integer, HashMap>> findOptimalJoinOrder(HashMap... lists) {
+        List<Pair<Integer, HashMap>> orderedList = new ArrayList<>();
+        for (HashMap list : lists
+                ) {
+            orderedList.add(new Pair<>(list.size(), list));
+        }
+        Collections.sort(orderedList, Comparator.comparing(p -> p._1()));
+        return orderedList;
     }
 
     public static HashMap[] findJoinOrder(HashMap... lists) {

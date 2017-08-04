@@ -71,13 +71,15 @@ public class StreamingServer {
                 }
                 break;
             case SLICEJOIN:
-                streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
+                // streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
+                streamingAlgorithms.sliceJoinWithOptimalJoinOrder(key, value, "CA", streamName);
                 break;
             case XJOIN:
                 streamingAlgorithms.xJoin(key, value, "CA", streamName);
                 break;
             case MJOIN:
-                streamingAlgorithms.mJoin(key, value, "CA", streamName);
+                // streamingAlgorithms.mJoin(key, value, "CA", streamName);
+                streamingAlgorithms.mJoinWithOptimalJoinOrdering(key, value, "CA", streamName);
                 break;
         }
 

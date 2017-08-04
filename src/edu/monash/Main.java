@@ -1,15 +1,12 @@
 package edu.monash;
 
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        //test3();
+        //findOptimalJoinOrderTest();
         start();
     }
 
@@ -27,6 +24,33 @@ public class Main {
         }
     }
 
+    public static void findOptimalJoinOrderTest(){
+        HashMap<String, String> a1 = new HashMap<>();
+        HashMap<String, String> a2 = new HashMap<>();
+        HashMap<String, String> a3 = new HashMap<>();
+
+        // Test case 1: All hash map is empty
+
+        // Test case 2: All hash map has different size
+        a1.put("1", "1");
+        a2.put("1", "1");
+        a2.put("2", "1");
+        a3.put("1", "1");
+        a3.put("2", "1");
+        a3.put("3", "1");
+
+        // Test case 2: Some of them have same size
+        a3.remove("2");
+        a3.remove("3");
+
+        List<Pair<Integer, HashMap>> sortedMap =
+                Utils.findOptimalJoinOrder(a2, a1, a3);
+
+
+        if (sortedMap.get(0)._2().containsKey("1") && sortedMap.get(1)._2().containsKey("1") && sortedMap.get(2)._2().containsKey("1")) {
+            System.out.println(sortedMap.get(1)._2().get("1"));
+        }
+    }
     public static void test3(){
         MultiValueMap mvm = new MultiValueMap();
         mvm.putValue("1", "First");
