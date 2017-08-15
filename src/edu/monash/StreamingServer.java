@@ -15,14 +15,11 @@ public class StreamingServer {
     public void startService(ServerSocket serverSocket) {
         Socket connectionSocket;
         try {
-            //System.out.println("Streaming Server is listening ...");
             connectionSocket = serverSocket.accept();
-
-            //START THREAD
             Thread thread = new Thread(() -> receiveTuples(connectionSocket));
             thread.start();
         } catch (Exception ex) {
-
+            ex.printStackTrace();
         }
     }
 
@@ -35,7 +32,6 @@ public class StreamingServer {
                 String key = messageRead.split(":")[1];
                 String value = messageRead.split(":")[2];
                 Algorithm algorithm = Algorithm.valueOf(messageRead.split(":")[3]);
-               // System.out.println(messageRead);
                 switch (streamName) {
                     case "R":
                         executeJoins(algorithm, key, value, streamName);
@@ -67,19 +63,18 @@ public class StreamingServer {
 //                    Thread thread = new Thread(() -> streamingAlgorithms.earlyHashJoinCleanUp());
 //                    thread.start();
                 } else {
-                    streamingAlgorithms.earlyHashJoin(key, value, "1M", streamName);
+                   // streamingAlgorithms.initialiseBitSetToTrue();
+                    streamingAlgorithms.earlyHashJoinModified(key, value, "MM", streamName, false);
                 }
                 break;
             case SLICEJOIN:
-                // streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
-                streamingAlgorithms.sliceJoinWithOptimalJoinOrder(key, value, "CA", streamName);
+                streamingAlgorithms.sliceJoin(key, value, "CA", streamName, true);
                 break;
             case XJOIN:
                 streamingAlgorithms.xJoin(key, value, "CA", streamName);
                 break;
             case MJOIN:
-                // streamingAlgorithms.mJoin(key, value, "CA", streamName);
-                streamingAlgorithms.mJoinWithOptimalJoinOrdering(key, value, "CA", streamName);
+                streamingAlgorithms.mJoin(key, value, "CA", streamName, true);
                 break;
         }
 

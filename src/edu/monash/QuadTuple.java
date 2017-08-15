@@ -5,39 +5,38 @@ import java.io.Serializable;
 /**
  * Created by psangats on 7/07/2017.
  */
-public class QuadTuple<K, V, ATS, DTS> implements Serializable{
+public class QuadTuple<W, X, Y, Z> implements Serializable {
 
-    private final K key;
-    private final V value;
-    private final ATS ats;
-    private final DTS dts;
+    private final W first;
+    private final X second;
+    private final Y third;
+    private final Z fourth;
 
-    public QuadTuple(K key, V value, ATS ats, DTS dts) {
-        this.key = key;
-        this.value = value;
-        this.ats = ats;
-        this.dts = dts;
+    public QuadTuple(W first, X second, Y third, Z fourth) {
+        this.first = first;
+        this.second = second;
+        this.third = third;
+        this.fourth = fourth;
     }
 
-    public K getKey() {
-        return key;
+    public W getFirst() {
+        return first;
     }
 
-    public V getValue() {
-        return value;
+    public X getSecond() {
+        return second;
     }
 
-    public ATS getAts() {
-        return ats;
+    public Y getThird() {
+        return third;
     }
 
-    public DTS getDts() {
-        return dts;
+    public Z getFourth() {
+        return fourth;
     }
-
 
     @Override
     public String toString() {
-        return  getKey() + ", " + getValue() + ", " + getAts() + ", " + getDts();
+        return getFirst() + ", " + getSecond() + ", " + getThird() + ", " + getFourth();
     }
 }
