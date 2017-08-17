@@ -18,7 +18,7 @@ public final class Utils {
         return bytes / MEGABYTE;
     }
 
-    public static List<Tuple<Integer, HashMap>> getOptimalJoinOrder(HashMap... lists) {
+    public static List<Tuple<Integer, HashMap>> getOptimalProbeSequence(HashMap... lists) {
         List<Tuple<Integer, HashMap>> orderedList = new ArrayList<>();
         for (HashMap list : lists
                 ) {
@@ -27,8 +27,16 @@ public final class Utils {
         Collections.sort(orderedList, Comparator.comparing(p -> p.getFirst()));
         return orderedList;
     }
-
-    public static List<Tuple<Integer, HashMap>> getFixedJoinOrder(String stream, HashMap... lists) {
+    public static List<Tuple<Integer, HashMap>> getWrongProbeSequence(HashMap... lists) {
+        List<Tuple<Integer, HashMap>> orderedList = new ArrayList<>();
+        for (HashMap list : lists
+                ) {
+            orderedList.add(new Tuple<>(list.size(), list));
+        }
+        Collections.sort(orderedList, Comparator.comparing(p -> p.getFirst(), Collections.reverseOrder()));
+        return orderedList;
+    }
+    public static List<Tuple<Integer, HashMap>> getFixedProbeSequence(String stream, HashMap... lists) {
         List<Tuple<Integer, HashMap>> orderedList = new ArrayList<>();
         switch (stream) {
             case "R":

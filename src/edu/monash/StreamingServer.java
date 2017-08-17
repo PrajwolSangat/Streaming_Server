@@ -10,7 +10,11 @@ import java.net.Socket;
  * Created by psangats on 7/07/2017.
  */
 public class StreamingServer {
-    private StreamingAlgorithms streamingAlgorithms = new StreamingAlgorithms();
+    private StreamingAlgorithms streamingAlgorithms;
+
+    public StreamingServer(Algorithm algorithm, ProbeSequence probeSequence) {
+        streamingAlgorithms = new StreamingAlgorithms(algorithm, probeSequence);
+    }
 
     public void startService(ServerSocket serverSocket) {
         Socket connectionSocket;
@@ -31,19 +35,18 @@ public class StreamingServer {
                 String streamName = messageRead.split(":")[0];
                 String key = messageRead.split(":")[1];
                 String value = messageRead.split(":")[2];
-                Algorithm algorithm = Algorithm.valueOf(messageRead.split(":")[3]);
                 switch (streamName) {
                     case "R":
-                        executeJoins(algorithm, key, value, streamName);
+                        executeJoins(key, value, streamName);
                         break;
                     case "S":
-                        executeJoins(algorithm, key, value, streamName);
+                        executeJoins(key, value, streamName);
                         break;
                     case "T":
-                        executeJoins(algorithm, key, value, streamName);
+                        executeJoins(key, value, streamName);
                         break;
                     case "U":
-                        executeJoins(algorithm, key, value, streamName);
+                        executeJoins(key, value, streamName);
                         break;
                 }
             }
@@ -52,29 +55,22 @@ public class StreamingServer {
         }
     }
 
-    private void executeJoins(Algorithm algorithm, String key, String value, String streamName) {
-        switch (algorithm) {
+    private void executeJoins(String key, String value, String streamName) {
+        switch (streamingAlgorithms.getAlgorithm()) {
             case AMJOIN:
-                streamingAlgorithms.amJoin(key, value, "CA", streamName);
+                streamingAlgorithms.amJoin(key, value, streamName);
                 break;
             case EHJOIN:
-                if (key.equals("CLEANUP")) {
-                    System.out.println("Received Cleanup Request.");
-//                    Thread thread = new Thread(() -> streamingAlgorithms.earlyHashJoinCleanUp());
-//                    thread.start();
-                } else {
-                   // streamingAlgorithms.initialiseBitSetToTrue();
-                    streamingAlgorithms.earlyHashJoinModified(key, value, "MM", streamName, false);
-                }
+                streamingAlgorithms.earlyHashJoinModified(key, value, streamName);
                 break;
             case SLICEJOIN:
-                streamingAlgorithms.sliceJoin(key, value, "CA", streamName, true);
+                streamingAlgorithms.sliceJoin(key, value, "CA", streamName);
                 break;
             case XJOIN:
-                streamingAlgorithms.xJoin(key, value, "CA", streamName);
+                streamingAlgorithms.xJoin(key, value, streamName);
                 break;
             case MJOIN:
-                streamingAlgorithms.mJoin(key, value, "CA", streamName, true);
+                streamingAlgorithms.mJoin(key, value, streamName);
                 break;
         }
 
