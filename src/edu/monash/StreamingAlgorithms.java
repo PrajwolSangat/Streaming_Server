@@ -71,7 +71,8 @@ public class StreamingAlgorithms {
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[XJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
                     System.out.println("[XJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
-                    return;
+                    System.exit(0);
+//                    return;
                 }
                 if (hashTableR.containsKey(key)) {
                     ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableR.get(key);
@@ -96,7 +97,7 @@ public class StreamingAlgorithms {
                                 initialResponseTimeStamp = sw.elaspsedTime();
                                 isInitialResponse = false;
                             }
-                            System.out.println(String.format("[XOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+//                            System.out.println(String.format("[XOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                         }
                     }
                 }
@@ -125,7 +126,7 @@ public class StreamingAlgorithms {
                                 initialResponseTimeStamp = sw.elaspsedTime();
                                 isInitialResponse = false;
                             }
-                            System.out.println(String.format("[XOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+//                            System.out.println(String.format("[XOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                         }
                     }
                 }
@@ -148,7 +149,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[XOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+//                        System.out.println(String.format("[XOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                     }
                 }
                 break;
@@ -164,7 +165,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime();
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[XOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+//                    System.out.println(String.format("[XOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                 }
                 break;
         }
@@ -185,7 +186,8 @@ public class StreamingAlgorithms {
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[MJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
                     System.out.println("[MJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
-                    return;
+                    System.exit(0);
+//                    return;
                 }
                 if (hashTableR.containsKey(key)) {
                     ll_quad = (LinkedList<QuadTuple<String, String, Integer, Integer>>) hashTableR.get(key);
@@ -212,7 +214,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime();
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[MOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+//                    System.out.println(String.format("[MOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                 }
                 break;
             case "S":
@@ -241,7 +243,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime();
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[MOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+//                    System.out.println(String.format("[MOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                 }
                 break;
             case "T":
@@ -270,7 +272,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime();
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[MOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+//                    System.out.println(String.format("[MOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                 }
                 break;
             case "U":
@@ -299,7 +301,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime();
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[MOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+//                    System.out.println(String.format("[MOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                 }
                 break;
 
@@ -321,7 +323,8 @@ public class StreamingAlgorithms {
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[AMJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
                     System.out.println("[AMJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
-                    return;
+                    System.exit(0);
+//                    return;
                 }
                 if (hashTableR.containsKey(key)) {
                     ll_tri = (LinkedList<TriTuple<String, String, Integer>>) hashTableR.get(key);
@@ -341,7 +344,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[AMOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+//                        System.out.println(String.format("[AMOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -370,7 +373,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[AMOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+//                        System.out.println(String.format("[AMOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -399,7 +402,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[AMOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+//                        System.out.println(String.format("[AMOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -428,7 +431,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[AMOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+//                        System.out.println(String.format("[AMOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -455,7 +458,8 @@ public class StreamingAlgorithms {
                         finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                         System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
                         System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
-                        return;
+                        System.exit(0);
+//                        return;
                     }
                     integerTimeStamp++;
                     if (hashTableS.containsKey(key)) {
@@ -464,7 +468,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[EHJ Output R]: %s, %s, %s", key, value, hashTableS.get(key).toString()));
+//                        System.out.println(String.format("[EHJ Output R]: %s, %s, %s", key, value, hashTableS.get(key).toString()));
                         LinkedList<String> al = new LinkedList<>();
                         al.add(value);
                         hashTableR.put(key, al);
@@ -482,7 +486,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[EHJ Output S]: %s, %s, %s", key, hashTableR.get(key).toString(), value));
+//                        System.out.println(String.format("[EHJ Output S]: %s, %s, %s", key, hashTableR.get(key).toString(), value));
                     } else {
                         LinkedList<String> al = new LinkedList<>();
                         al.add(value);
@@ -499,7 +503,8 @@ public class StreamingAlgorithms {
                         finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                         System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
                         System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
-                        return;
+                        System.exit(0);
+//                        return;
                     }
                     integerTimeStamp++;
                     if (hashTableS.containsKey(key)) {
@@ -508,7 +513,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[EHJ Output R]: %s, %s, %s", key, "[" + integerTimeStamp + ", " + value + "]", hashTableS.get(key).toString()));
+//                        System.out.println(String.format("[EHJ Output R]: %s, %s, %s", key, "[" + integerTimeStamp + ", " + value + "]", hashTableS.get(key).toString()));
                     }
                     if (hashTableR.containsKey(key)) {
                         LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableR.get(key);
@@ -532,7 +537,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = System.currentTimeMillis();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[EHJ Output S]: %s, %s, %s", key, hashTableR.get(key).toString(), "[" + integerTimeStamp + ", " + value + "]"));
+//                        System.out.println(String.format("[EHJ Output S]: %s, %s, %s", key, hashTableR.get(key).toString(), "[" + integerTimeStamp + ", " + value + "]"));
                     }
                     if (hashTableS.containsKey(key)) {
                         LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -595,7 +600,8 @@ public class StreamingAlgorithms {
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
                     System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " micro Secs");
-                    return;
+                    System.exit(0);
+//                    return;
                 }
                 integerTimeStamp++;
                 List<Tuple<Integer, HashMap>> orderedMapsR = null;
@@ -618,7 +624,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[EHJ Output R]: %s, [%s], %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+//                    System.out.println(String.format("[EHJ Output R]: %s, [%s], %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                 }
                 if (hashTableR.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableR.get(key);
@@ -656,7 +662,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[EHJ Output S]: %s, %s, [%s], %s, %s", key, hashTableR.get(key), value, hashTableT.get(key), hashTableU.get(key)));
+//                    System.out.println(String.format("[EHJ Output S]: %s, %s, [%s], %s, %s", key, hashTableR.get(key), value, hashTableT.get(key), hashTableU.get(key)));
                 }
                 if (hashTableS.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -692,7 +698,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, [%s], %s", key, hashTableR.get(key), hashTableS.get(key), value, hashTableU.get(key)));
+//                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, [%s], %s", key, hashTableR.get(key), hashTableS.get(key), value, hashTableU.get(key)));
                 }
                 if (hashTableT.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -728,7 +734,7 @@ public class StreamingAlgorithms {
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
-                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, %s, [%s]", key, hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), value));
+//                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, %s, [%s]", key, hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), value));
                 }
                 if (hashTableU.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -784,7 +790,7 @@ public class StreamingAlgorithms {
                         for (String key : hashTableS.keySet()
                                 ) {
                             if (hashTableR.containsKey(key)) {
-                                System.out.println("EHJ CleanUP: " + key + ", " + hashTableR.get(key) + ", " + hashTableS.get(key));
+//                                System.out.println("EHJ CleanUP: " + key + ", " + hashTableR.get(key) + ", " + hashTableS.get(key));
                             }
                         }
                     } else {
@@ -811,9 +817,10 @@ public class StreamingAlgorithms {
                     if (key.equals("COMPLETE")) {
                         sw.stop();
                         finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
-                        System.out.println("[SLICE JOIN] Execution Time: " + finalArrivalTimeStamp + " nano Secs");
-                        System.out.println("[SLICE JOIN] Initial Response Time: " + initialResponseTimeStamp + " Secs");
-                        return;
+                        System.out.println("[SLICE JOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
+                        System.out.println("[SLICE JOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
+                        System.exit(0);
+//                        return;
                     }
                     integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
@@ -847,7 +854,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[Slice Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+//                        System.out.println(String.format("[Slice Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "S":
@@ -883,7 +890,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[Slice Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+//                        System.out.println(String.format("[Slice Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "T":
@@ -919,7 +926,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[Slice Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+//                        System.out.println(String.format("[Slice Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
                     }
                     break;
                 case "U":
@@ -955,7 +962,7 @@ public class StreamingAlgorithms {
                             initialResponseTimeStamp = sw.elaspsedTime();
                             isInitialResponse = false;
                         }
-                        System.out.println(String.format("[Slice Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+//                        System.out.println(String.format("[Slice Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
                     }
                     break;
             }
@@ -1001,7 +1008,7 @@ public class StreamingAlgorithms {
                         for (TriTuple triTuple :
                                 mappingList) {
                             if (hashTableT.containsKey(triTuple.getSecond())) {
-                                System.out.println(String.format("[Slice Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+//                                System.out.println(String.format("[Slice Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
                             }
                         }
                     }
@@ -1049,7 +1056,7 @@ public class StreamingAlgorithms {
                             break;
                     }
                     if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)) {
-                        System.out.println(String.format("[Slice Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+//                        System.out.println(String.format("[Slice Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
                     }
                     break;
                 case "T":
@@ -1083,7 +1090,7 @@ public class StreamingAlgorithms {
                         }
                         for (Tuple tuple : mappingList) {
                             if (orderedMapsT.get(0).getSecond().containsKey(tuple.getSecond()) && orderedMapsT.get(1).getSecond().containsKey(tuple.getSecond())) {
-                                System.out.println(String.format("[Slice Output T]:  %s, %s, %s, %s, %s", hashTableR.get(tuple.getSecond()), hashTableS.get(tuple.getSecond()), tuple.getFirst(), tuple.getSecond(), hashTableU.get(tuple.getSecond())));
+//                                System.out.println(String.format("[Slice Output T]:  %s, %s, %s, %s, %s", hashTableR.get(tuple.getSecond()), hashTableS.get(tuple.getSecond()), tuple.getFirst(), tuple.getSecond(), hashTableU.get(tuple.getSecond())));
                             }
                         }
                     }
@@ -1122,7 +1129,7 @@ public class StreamingAlgorithms {
                         for (TriTuple triTuple : mappingList
                                 ) {
                             if (hashTableT.containsKey(triTuple.getThird())) {
-                                System.out.println(String.format("[Slice Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), mappingList, hashTableT.get(triTuple.getThird()), key, value));
+//                                System.out.println(String.format("[Slice Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), mappingList, hashTableT.get(triTuple.getThird()), key, value));
                             }
                         }
                         // implementation of slice mapping complete
