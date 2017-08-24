@@ -34,6 +34,10 @@ public class StreamingAlgorithms {
     private Algorithm algorithm = Algorithm.NONE;
     private ProbeSequence probeSequence = ProbeSequence.NONE;
 
+    private int outputRecordCounter = 0;
+    private int NUMBER_OF_OUTPUT_TUPLES = 50000;
+    private List<Tuple<Integer, Long>> outputRateList = new LinkedList<>();
+
     public StreamingAlgorithms(Algorithm algorithm, ProbeSequence probeSequence) {
         setAlgorithm(algorithm);
         setProbeSequence(probeSequence);
@@ -70,7 +74,8 @@ public class StreamingAlgorithms {
                     sw.stop();
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[XJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                    System.out.println("[XJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
+                    System.out.println("[XJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+                    System.out.println("[XJOIN] Output Rate List: " + outputRateList);
                     System.exit(0);
 //                    return;
                 }
@@ -94,10 +99,15 @@ public class StreamingAlgorithms {
                         if (hashTableU.containsKey(key)) {
                             if (isInitialResponse) {
                                 sw.stop();
-                                initialResponseTimeStamp = sw.elaspsedTime();
+                                initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                                 isInitialResponse = false;
                             }
 //                            System.out.println(String.format("[XOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                            outputRecordCounter++;
+                            if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                                sw.stop();
+                                outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                            }
                         }
                     }
                 }
@@ -123,10 +133,15 @@ public class StreamingAlgorithms {
                         if (hashTableU.containsKey(key)) {
                             if (isInitialResponse) {
                                 sw.stop();
-                                initialResponseTimeStamp = sw.elaspsedTime();
+                                initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                                 isInitialResponse = false;
                             }
 //                            System.out.println(String.format("[XOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                            outputRecordCounter++;
+                            if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                                sw.stop();
+                                outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                            }
                         }
                     }
                 }
@@ -146,10 +161,15 @@ public class StreamingAlgorithms {
                     if (hashTableU.containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[XOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                 }
                 break;
@@ -162,10 +182,15 @@ public class StreamingAlgorithms {
                 if (hashTableRST.containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
-                        initialResponseTimeStamp = sw.elaspsedTime();
+                        initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[XOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 break;
         }
@@ -185,7 +210,8 @@ public class StreamingAlgorithms {
                     sw.stop();
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[MJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                    System.out.println("[MJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
+                    System.out.println("[MJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+                    System.out.println("[MJOIN] Output Rate List: " + outputRateList);
                     System.exit(0);
 //                    return;
                 }
@@ -211,10 +237,15 @@ public class StreamingAlgorithms {
                 if (orderedMapsR.get(0).getSecond().containsKey(key) && orderedMapsR.get(1).getSecond().containsKey(key) && orderedMapsR.get(2).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
-                        initialResponseTimeStamp = sw.elaspsedTime();
+                        initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[MOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 break;
             case "S":
@@ -240,10 +271,15 @@ public class StreamingAlgorithms {
                 if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
-                        initialResponseTimeStamp = sw.elaspsedTime();
+                        initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[MOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 break;
             case "T":
@@ -269,10 +305,15 @@ public class StreamingAlgorithms {
                 if (orderedMapsT.get(0).getSecond().containsKey(key) && orderedMapsT.get(1).getSecond().containsKey(key) && orderedMapsT.get(2).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
-                        initialResponseTimeStamp = sw.elaspsedTime();
+                        initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[MOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 break;
             case "U":
@@ -298,10 +339,15 @@ public class StreamingAlgorithms {
                 if (orderedMapsU.get(0).getSecond().containsKey(key) && orderedMapsU.get(1).getSecond().containsKey(key) && orderedMapsU.get(2).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
-                        initialResponseTimeStamp = sw.elaspsedTime();
+                        initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[MOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 break;
 
@@ -322,7 +368,8 @@ public class StreamingAlgorithms {
                     sw.stop();
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[AMJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                    System.out.println("[AMJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
+                    System.out.println("[AMJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+                    System.out.println("[AMJOIN] Output Rate List: " + outputRateList);
                     System.exit(0);
 //                    return;
                 }
@@ -341,10 +388,15 @@ public class StreamingAlgorithms {
                     if (vector.equals(Utils.getAllBits())) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[AMOutput R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -370,10 +422,15 @@ public class StreamingAlgorithms {
                     if (vector.equals(Utils.getAllBits())) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[AMOutput S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -399,10 +456,15 @@ public class StreamingAlgorithms {
                     if (vector.equals(Utils.getAllBits())) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[AMOutput T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -428,10 +490,15 @@ public class StreamingAlgorithms {
                     if (vector.equals(Utils.getAllBits())) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[AMOutput U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                 } else {
                     // INSERT INDEX WITH VECTOR
@@ -457,7 +524,7 @@ public class StreamingAlgorithms {
                         sw.stop();
                         finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                         System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                        System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
+                        System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
                         System.exit(0);
 //                        return;
                     }
@@ -465,7 +532,7 @@ public class StreamingAlgorithms {
                     if (hashTableS.containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[EHJ Output R]: %s, %s, %s", key, value, hashTableS.get(key).toString()));
@@ -483,7 +550,8 @@ public class StreamingAlgorithms {
                     integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
                         if (isInitialResponse) {
-                            initialResponseTimeStamp = System.currentTimeMillis();
+                            sw.stop();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[EHJ Output S]: %s, %s, %s", key, hashTableR.get(key).toString(), value));
@@ -510,7 +578,7 @@ public class StreamingAlgorithms {
                     if (hashTableS.containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[EHJ Output R]: %s, %s, %s", key, "[" + integerTimeStamp + ", " + value + "]", hashTableS.get(key).toString()));
@@ -534,7 +602,8 @@ public class StreamingAlgorithms {
                     integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
                         if (isInitialResponse) {
-                            initialResponseTimeStamp = System.currentTimeMillis();
+                            sw.stop();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[EHJ Output S]: %s, %s, %s", key, hashTableR.get(key).toString(), "[" + integerTimeStamp + ", " + value + "]"));
@@ -599,7 +668,8 @@ public class StreamingAlgorithms {
                     sw.stop();
                     finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                     System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                    System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " micro Secs");
+                    System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+                    System.out.println("[EHJOIN] Output Rate List: " + outputRateList);
                     System.exit(0);
 //                    return;
                 }
@@ -625,6 +695,11 @@ public class StreamingAlgorithms {
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[EHJ Output R]: %s, [%s], %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 if (hashTableR.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableR.get(key);
@@ -663,6 +738,11 @@ public class StreamingAlgorithms {
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[EHJ Output S]: %s, %s, [%s], %s, %s", key, hashTableR.get(key), value, hashTableT.get(key), hashTableU.get(key)));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 if (hashTableS.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -699,6 +779,11 @@ public class StreamingAlgorithms {
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, [%s], %s", key, hashTableR.get(key), hashTableS.get(key), value, hashTableU.get(key)));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 if (hashTableT.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -735,6 +820,11 @@ public class StreamingAlgorithms {
                         isInitialResponse = false;
                     }
 //                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, %s, [%s]", key, hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), value));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
                 }
                 if (hashTableU.containsKey(key)) {
                     LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
@@ -818,7 +908,8 @@ public class StreamingAlgorithms {
                         sw.stop();
                         finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
                         System.out.println("[SLICE JOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                        System.out.println("[SLICE JOIN] Initial Response Time: " + initialResponseTimeStamp + " nano Secs");
+                        System.out.println("[SLICE JOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+                        System.out.println("[SLICE JOIN] Output Rate List: " + outputRateList);
                         System.exit(0);
 //                        return;
                     }
@@ -851,10 +942,15 @@ public class StreamingAlgorithms {
                     if (orderedMapsR.get(0).getSecond().containsKey(key) && orderedMapsR.get(1).getSecond().containsKey(key) && orderedMapsR.get(2).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[Slice Output R]: %s, %s, %s, %s, %s", key, value, hashTableS.get(key), hashTableT.get(key), hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                     break;
                 case "S":
@@ -887,10 +983,15 @@ public class StreamingAlgorithms {
                     if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[Slice Output S]: %s, %s, %s, %s, %s", hashTableR.get(key), key, value, hashTableT.get(key), hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                     break;
                 case "T":
@@ -923,10 +1024,15 @@ public class StreamingAlgorithms {
                     if (orderedMapsT.get(0).getSecond().containsKey(key) && orderedMapsT.get(1).getSecond().containsKey(key) && orderedMapsT.get(2).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[Slice Output T]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), key, value, hashTableU.get(key)));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                     break;
                 case "U":
@@ -959,10 +1065,15 @@ public class StreamingAlgorithms {
                     if (orderedMapsU.get(0).getSecond().containsKey(key) && orderedMapsU.get(1).getSecond().containsKey(key) && orderedMapsU.get(2).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
-                            initialResponseTimeStamp = sw.elaspsedTime();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
                             isInitialResponse = false;
                         }
 //                        System.out.println(String.format("[Slice Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
                     }
                     break;
             }
