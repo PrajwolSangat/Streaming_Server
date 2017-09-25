@@ -12,6 +12,7 @@ public class StreamingAlgorithms {
     private HashMap hashTableS = new HashMap();
     private HashMap hashTableT = new HashMap();
     private HashMap hashTableU = new HashMap();
+    private HashMap hashTableV = new HashMap();
     private HashMap indirectPartitionMapper = new HashMap();
 
     // Used for Biased Flushing Policy in Early Hash Join
@@ -662,33 +663,33 @@ public class StreamingAlgorithms {
             sw.start();
             isFirst = false;
         }
+        if (key.equals("COMPLETE")) {
+            sw.stop();
+            finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
+            System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
+            System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+            System.out.println("[EHJOIN] Output Rate List: " + outputRateList);
+            System.exit(0);
+//                    return;
+        }
         switch (whichStream) {
             case "R":
-                if (key.equals("COMPLETE")) {
-                    sw.stop();
-                    finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
-                    System.out.println("[EHJOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                    System.out.println("[EHJOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
-                    System.out.println("[EHJOIN] Output Rate List: " + outputRateList);
-                    System.exit(0);
-//                    return;
-                }
                 integerTimeStamp++;
                 List<Tuple<Integer, HashMap>> orderedMapsR = null;
                 switch (probeSequence) {
                     case FIXED:
-                        orderedMapsR = Utils.getFixedProbeSequence("R", hashTableR, hashTableS, hashTableT, hashTableU);
+                        orderedMapsR = Utils.getFixedProbeSequence("R", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                         break;
                     case WRONG:
-                        orderedMapsR = Utils.getWrongProbeSequence(hashTableS, hashTableT, hashTableU);
+                        orderedMapsR = Utils.getWrongProbeSequence(hashTableS, hashTableT, hashTableU, hashTableV);
                         break;
                     case OPTIMAL:
-                        orderedMapsR = Utils.getOptimalProbeSequence(hashTableS, hashTableT, hashTableU);
+                        orderedMapsR = Utils.getOptimalProbeSequence(hashTableS, hashTableT, hashTableU, hashTableV);
                         break;
                     case NONE:
                         break;
                 }
-                if (orderedMapsR.get(0).getSecond().containsKey(key) && orderedMapsR.get(1).getSecond().containsKey(key) && orderedMapsR.get(2).getSecond().containsKey(key)) {
+                if (orderedMapsR.get(0).getSecond().containsKey(key) && orderedMapsR.get(1).getSecond().containsKey(key) && orderedMapsR.get(2).getSecond().containsKey(key)&& orderedMapsR.get(3).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -720,18 +721,18 @@ public class StreamingAlgorithms {
                 List<Tuple<Integer, HashMap>> orderedMapsS = null;
                 switch (probeSequence) {
                     case FIXED:
-                        orderedMapsS = Utils.getFixedProbeSequence("S", hashTableR, hashTableS, hashTableT, hashTableU);
+                        orderedMapsS = Utils.getFixedProbeSequence("S", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                         break;
                     case WRONG:
-                        orderedMapsS = Utils.getWrongProbeSequence(hashTableR, hashTableT, hashTableU);
+                        orderedMapsS = Utils.getWrongProbeSequence(hashTableR, hashTableT, hashTableU, hashTableV);
                         break;
                     case OPTIMAL:
-                        orderedMapsS = Utils.getOptimalProbeSequence(hashTableR, hashTableT, hashTableU);
+                        orderedMapsS = Utils.getOptimalProbeSequence(hashTableR, hashTableT, hashTableU, hashTableV);
                         break;
                     case NONE:
                         break;
                 }
-                if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)) {
+                if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)&& orderedMapsS.get(3).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -761,18 +762,18 @@ public class StreamingAlgorithms {
                 List<Tuple<Integer, HashMap>> orderedMapsT = null;
                 switch (probeSequence) {
                     case FIXED:
-                        orderedMapsT = Utils.getFixedProbeSequence("T", hashTableR, hashTableS, hashTableT, hashTableU);
+                        orderedMapsT = Utils.getFixedProbeSequence("T", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                         break;
                     case WRONG:
-                        orderedMapsT = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableU);
+                        orderedMapsT = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableU,hashTableV);
                         break;
                     case OPTIMAL:
-                        orderedMapsT = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableU);
+                        orderedMapsT = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableU, hashTableV);
                         break;
                     case NONE:
                         break;
                 }
-                if (orderedMapsT.get(0).getSecond().containsKey(key) && orderedMapsT.get(1).getSecond().containsKey(key) && orderedMapsT.get(2).getSecond().containsKey(key)) {
+                if (orderedMapsT.get(0).getSecond().containsKey(key) && orderedMapsT.get(1).getSecond().containsKey(key) && orderedMapsT.get(2).getSecond().containsKey(key)&& orderedMapsT.get(3).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -786,7 +787,7 @@ public class StreamingAlgorithms {
                     }
                 }
                 if (hashTableT.containsKey(key)) {
-                    LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
+                    LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableT.get(key);
                     Tuple<Integer, String> tuple = new Tuple<>(integerTimeStamp, value);
                     linkedList.add(tuple);
                     hashTableT.put(key, linkedList);
@@ -802,18 +803,18 @@ public class StreamingAlgorithms {
                 List<Tuple<Integer, HashMap>> orderedMapsU = null;
                 switch (probeSequence) {
                     case FIXED:
-                        orderedMapsU = Utils.getFixedProbeSequence("U", hashTableR, hashTableS, hashTableT, hashTableU);
+                        orderedMapsU = Utils.getFixedProbeSequence("U", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                         break;
                     case WRONG:
-                        orderedMapsU = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableT);
+                        orderedMapsU = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableT, hashTableV);
                         break;
                     case OPTIMAL:
-                        orderedMapsU = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableT);
+                        orderedMapsU = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableT, hashTableV);
                         break;
                     case NONE:
                         break;
                 }
-                if (orderedMapsU.get(0).getSecond().containsKey(key) && orderedMapsU.get(1).getSecond().containsKey(key) && orderedMapsU.get(2).getSecond().containsKey(key)) {
+                if (orderedMapsU.get(0).getSecond().containsKey(key) && orderedMapsU.get(1).getSecond().containsKey(key) && orderedMapsU.get(2).getSecond().containsKey(key)&& orderedMapsU.get(3).getSecond().containsKey(key)) {
                     if (isInitialResponse) {
                         sw.stop();
                         initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -827,7 +828,7 @@ public class StreamingAlgorithms {
                     }
                 }
                 if (hashTableU.containsKey(key)) {
-                    LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableS.get(key);
+                    LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableU.get(key);
                     Tuple<Integer, String> tuple = new Tuple<>(integerTimeStamp, value);
                     linkedList.add(tuple);
                     hashTableU.put(key, linkedList);
@@ -836,6 +837,47 @@ public class StreamingAlgorithms {
                     Tuple<Integer, String> tuple = new Tuple<>(integerTimeStamp, value);
                     linkedList.add(tuple);
                     hashTableU.put(key, linkedList);
+                }
+                break;
+            case "V":
+                integerTimeStamp++;
+                List<Tuple<Integer, HashMap>> orderedMapsV = null;
+                switch (probeSequence) {
+                    case FIXED:
+                        orderedMapsV = Utils.getFixedProbeSequence("U", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
+                        break;
+                    case WRONG:
+                        orderedMapsV = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableT, hashTableU);
+                        break;
+                    case OPTIMAL:
+                        orderedMapsV = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableT, hashTableU);
+                        break;
+                    case NONE:
+                        break;
+                }
+                if (orderedMapsV.get(0).getSecond().containsKey(key) && orderedMapsV.get(1).getSecond().containsKey(key) && orderedMapsV.get(2).getSecond().containsKey(key)&& orderedMapsV.get(3).getSecond().containsKey(key)) {
+                    if (isInitialResponse) {
+                        sw.stop();
+                        initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
+                        isInitialResponse = false;
+                    }
+//                    System.out.println(String.format("[EHJ Output S]: %s, %s, %s, %s, [%s]", key, hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), value));
+                    outputRecordCounter++;
+                    if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                        sw.stop();
+                        outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                    }
+                }
+                if (hashTableV.containsKey(key)) {
+                    LinkedList<Tuple<Integer, String>> linkedList = (LinkedList<Tuple<Integer, String>>) hashTableV.get(key);
+                    Tuple<Integer, String> tuple = new Tuple<>(integerTimeStamp, value);
+                    linkedList.add(tuple);
+                    hashTableV.put(key, linkedList);
+                } else {
+                    LinkedList<Tuple<Integer, String>> linkedList = new LinkedList<>();
+                    Tuple<Integer, String> tuple = new Tuple<>(integerTimeStamp, value);
+                    linkedList.add(tuple);
+                    hashTableV.put(key, linkedList);
                 }
                 break;
         }
@@ -901,18 +943,18 @@ public class StreamingAlgorithms {
                 sw.start();
                 isFirst = false;
             }
+            if (key.equals("COMPLETE")) {
+                sw.stop();
+                finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
+                System.out.println("[SLICE JOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
+                System.out.println("[SLICE JOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
+                System.out.println("[SLICE JOIN] Output Rate List: " + outputRateList);
+                System.exit(0);
+//                        return;
+            }
             switch (whichStream) {
                 // Common Attribute Join [Key is the common attribute]
                 case "R":
-                    if (key.equals("COMPLETE")) {
-                        sw.stop();
-                        finalArrivalTimeStamp = sw.elaspsedTime(TimeUnit.SECONDS);
-                        System.out.println("[SLICE JOIN] Execution Time: " + finalArrivalTimeStamp + " Secs");
-                        System.out.println("[SLICE JOIN] Initial Response Time: " + initialResponseTimeStamp + " milli Secs");
-                        System.out.println("[SLICE JOIN] Output Rate List: " + outputRateList);
-                        System.exit(0);
-//                        return;
-                    }
                     integerTimeStamp++;
                     if (hashTableR.containsKey(key)) {
                         LinkedList<TriTuple<Integer, String, String>> linkedList = (LinkedList<TriTuple<Integer, String, String>>) hashTableR.get(key);
@@ -928,18 +970,18 @@ public class StreamingAlgorithms {
                     List<Tuple<Integer, HashMap>> orderedMapsR = null;
                     switch (probeSequence) {
                         case FIXED:
-                            orderedMapsR = Utils.getFixedProbeSequence("R", hashTableR, hashTableS, hashTableT, hashTableU);
+                            orderedMapsR = Utils.getFixedProbeSequence("R", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                             break;
                         case WRONG:
-                            orderedMapsR = Utils.getWrongProbeSequence(hashTableS, hashTableT, hashTableU);
+                            orderedMapsR = Utils.getWrongProbeSequence(hashTableS, hashTableT, hashTableU, hashTableV);
                             break;
                         case OPTIMAL:
-                            orderedMapsR = Utils.getOptimalProbeSequence(hashTableS, hashTableT, hashTableU);
+                            orderedMapsR = Utils.getOptimalProbeSequence(hashTableS, hashTableT, hashTableU, hashTableV);
                             break;
                         case NONE:
                             break;
                     }
-                    if (orderedMapsR.get(0).getSecond().containsKey(key) && orderedMapsR.get(1).getSecond().containsKey(key) && orderedMapsR.get(2).getSecond().containsKey(key)) {
+                    if (orderedMapsR.get(0).getSecond().containsKey(key) && orderedMapsR.get(1).getSecond().containsKey(key) && orderedMapsR.get(2).getSecond().containsKey(key)&& orderedMapsR.get(3).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
                             initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -969,18 +1011,18 @@ public class StreamingAlgorithms {
                     List<Tuple<Integer, HashMap>> orderedMapsS = null;
                     switch (probeSequence) {
                         case FIXED:
-                            orderedMapsS = Utils.getFixedProbeSequence("S", hashTableR, hashTableS, hashTableT, hashTableU);
+                            orderedMapsS = Utils.getFixedProbeSequence("S", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                             break;
                         case WRONG:
-                            orderedMapsS = Utils.getWrongProbeSequence(hashTableR, hashTableT, hashTableU);
+                            orderedMapsS = Utils.getWrongProbeSequence(hashTableR, hashTableT, hashTableU, hashTableV);
                             break;
                         case OPTIMAL:
-                            orderedMapsS = Utils.getOptimalProbeSequence(hashTableR, hashTableT, hashTableU);
+                            orderedMapsS = Utils.getOptimalProbeSequence(hashTableR, hashTableT, hashTableU, hashTableV);
                             break;
                         case NONE:
                             break;
                     }
-                    if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)) {
+                    if (orderedMapsS.get(0).getSecond().containsKey(key) && orderedMapsS.get(1).getSecond().containsKey(key) && orderedMapsS.get(2).getSecond().containsKey(key)&& orderedMapsS.get(3).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
                             initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -1010,18 +1052,18 @@ public class StreamingAlgorithms {
                     List<Tuple<Integer, HashMap>> orderedMapsT = null;
                     switch (probeSequence) {
                         case FIXED:
-                            orderedMapsT = Utils.getFixedProbeSequence("T", hashTableR, hashTableS, hashTableT, hashTableU);
+                            orderedMapsT = Utils.getFixedProbeSequence("T", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                             break;
                         case WRONG:
-                            orderedMapsT = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableU);
+                            orderedMapsT = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableU, hashTableV);
                             break;
                         case OPTIMAL:
-                            orderedMapsT = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableU);
+                            orderedMapsT = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableU, hashTableV);
                             break;
                         case NONE:
                             break;
                     }
-                    if (orderedMapsT.get(0).getSecond().containsKey(key) && orderedMapsT.get(1).getSecond().containsKey(key) && orderedMapsT.get(2).getSecond().containsKey(key)) {
+                    if (orderedMapsT.get(0).getSecond().containsKey(key) && orderedMapsT.get(1).getSecond().containsKey(key) && orderedMapsT.get(2).getSecond().containsKey(key)&& orderedMapsT.get(3).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
                             initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
@@ -1051,18 +1093,59 @@ public class StreamingAlgorithms {
                     List<Tuple<Integer, HashMap>> orderedMapsU = null;
                     switch (probeSequence) {
                         case FIXED:
-                            orderedMapsU = Utils.getFixedProbeSequence("U", hashTableR, hashTableS, hashTableT, hashTableU);
+                            orderedMapsU = Utils.getFixedProbeSequence("U", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
                             break;
                         case WRONG:
-                            orderedMapsU = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableT);
+                            orderedMapsU = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableT, hashTableV);
                             break;
                         case OPTIMAL:
-                            orderedMapsU = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableT);
+                            orderedMapsU = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableT, hashTableV);
                             break;
                         case NONE:
                             break;
                     }
-                    if (orderedMapsU.get(0).getSecond().containsKey(key) && orderedMapsU.get(1).getSecond().containsKey(key) && orderedMapsU.get(2).getSecond().containsKey(key)) {
+                    if (orderedMapsU.get(0).getSecond().containsKey(key) && orderedMapsU.get(1).getSecond().containsKey(key) && orderedMapsU.get(2).getSecond().containsKey(key) && orderedMapsU.get(3).getSecond().containsKey(key)) {
+                        if (isInitialResponse) {
+                            sw.stop();
+                            initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);
+                            isInitialResponse = false;
+                        }
+//                        System.out.println(String.format("[Slice Output U]: %s, %s, %s, %s, %s", hashTableR.get(key), hashTableS.get(key), hashTableT.get(key), key, value));
+                        outputRecordCounter++;
+                        if (outputRecordCounter % NUMBER_OF_OUTPUT_TUPLES == 0) {
+                            sw.stop();
+                            outputRateList.add(new Tuple<>(outputRecordCounter, sw.elaspsedTime(TimeUnit.MILLISECONDS)));
+                        }
+                    }
+                    break;
+                case "V":
+                    integerTimeStamp++;
+                    if (hashTableV.containsKey(key)) {
+                        LinkedList<TriTuple<Integer, String, String>> linkedList = (LinkedList<TriTuple<Integer, String, String>>) hashTableV.get(key);
+                        TriTuple<Integer, String, String> triTuple = new TriTuple<>(integerTimeStamp, key, value);
+                        linkedList.add(triTuple);
+                        hashTableV.put(key, linkedList);
+                    } else {
+                        LinkedList<TriTuple> linkedList = new LinkedList<>();
+                        TriTuple<Integer, String, String> triTuple = new TriTuple<>(integerTimeStamp, key, value);
+                        linkedList.add(triTuple);
+                        hashTableV.put(key, linkedList);
+                    }
+                    List<Tuple<Integer, HashMap>> orderedMapsV = null;
+                    switch (probeSequence) {
+                        case FIXED:
+                            orderedMapsV = Utils.getFixedProbeSequence("U", hashTableR, hashTableS, hashTableT, hashTableU, hashTableV);
+                            break;
+                        case WRONG:
+                            orderedMapsV = Utils.getWrongProbeSequence(hashTableR, hashTableS, hashTableT, hashTableU);
+                            break;
+                        case OPTIMAL:
+                            orderedMapsV = Utils.getOptimalProbeSequence(hashTableR, hashTableS, hashTableT, hashTableU);
+                            break;
+                        case NONE:
+                            break;
+                    }
+                    if (orderedMapsV.get(0).getSecond().containsKey(key) && orderedMapsV.get(1).getSecond().containsKey(key) && orderedMapsV.get(2).getSecond().containsKey(key) && orderedMapsV.get(3).getSecond().containsKey(key)) {
                         if (isInitialResponse) {
                             sw.stop();
                             initialResponseTimeStamp = sw.elaspsedTime(TimeUnit.MILLISECONDS);

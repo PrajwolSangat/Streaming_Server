@@ -43,21 +43,31 @@ public final class Utils {
                 orderedList.add(new Tuple<>(0, lists[1]));
                 orderedList.add(new Tuple<>(1, lists[2]));
                 orderedList.add(new Tuple<>(2, lists[3]));
+                orderedList.add(new Tuple<>(3, lists[4]));
                 break;
             case "S":
                 orderedList.add(new Tuple<>(0, lists[0]));
                 orderedList.add(new Tuple<>(1, lists[2]));
                 orderedList.add(new Tuple<>(2, lists[3]));
+                orderedList.add(new Tuple<>(3, lists[4]));
                 break;
             case "T":
                 orderedList.add(new Tuple<>(0, lists[0]));
                 orderedList.add(new Tuple<>(1, lists[1]));
                 orderedList.add(new Tuple<>(2, lists[3]));
+                orderedList.add(new Tuple<>(3, lists[4]));
                 break;
             case "U":
                 orderedList.add(new Tuple<>(0, lists[0]));
                 orderedList.add(new Tuple<>(1, lists[1]));
                 orderedList.add(new Tuple<>(2, lists[2]));
+                orderedList.add(new Tuple<>(3, lists[4]));
+                break;
+            case "V":
+                orderedList.add(new Tuple<>(0, lists[0]));
+                orderedList.add(new Tuple<>(1, lists[1]));
+                orderedList.add(new Tuple<>(2, lists[2]));
+                orderedList.add(new Tuple<>(3, lists[3]));
                 break;
         }
         return orderedList;
